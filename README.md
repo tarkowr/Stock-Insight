@@ -4,11 +4,11 @@
 
 ### Applcation Details
 
-* *Description:* Stock Insight is a WPF application that allows users to view data about each Stock in their Watchlist.
-* *Application Type:* Window Presentation Foundation (WPF)
-* *Persistence Type:* MongoDB & Web API
-* *Date Created:* 12/1/18
-* *Last Modified:* 12/2/18
+* **Description:** Stock Insight is a WPF application that allows users to view data about each Stock in their Watchlist.
+* **Application Type:** Window Presentation Foundation (WPF)
+* **Persistence Type:** MongoDB & Web API
+* **Date Created:** 12/1/18
+* **Last Modified:** 12/2/18
 
 ### Code Used from Online Resources
 
