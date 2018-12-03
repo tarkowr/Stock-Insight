@@ -2,6 +2,14 @@
 
 ### Author: Richie Tarkowski
 
+### Applcation Details
+
+* *Description:* Stock Insight is a WPF application that allows users to view data about each Stock in their Watchlist.
+* *Application Type:* Window Presentation Foundation (WPF)
+* *Persistence Type:* MongoDB & Web API
+* *Date Created:* 12/1/18
+* *Last Modified:* 12/2/18
+
 ### Code Used from Online Resources
 
 * [Set the Color of the Selected Row in a Datagrid](https://stackoverflow.com/questions/1223280/how-can-i-set-the-color-of-a-selected-row-in-datagrid)
