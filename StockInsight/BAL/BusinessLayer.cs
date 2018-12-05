@@ -22,6 +22,9 @@ namespace StockInsight.BAL
             InstantiateFields();
         }
 
+        /// <summary>
+        /// Instantiate Data Services
+        /// </summary>
         private void InstantiateFields()
         {
             databaseService = new MongoDbService();
@@ -29,7 +32,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Read in Watchlist from database
         /// </summary>
         /// <param name="message"></param>
         public void ReadSavedWatchlist(out string message)
@@ -41,6 +44,7 @@ namespace StockInsight.BAL
                 using (databaseService)
                 {
                     context.Watchlist = databaseService.ReadWatchlist().ToList();
+                    context.Watchlist = context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
                 }
             }
             catch (Exception ex)
@@ -50,7 +54,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Save watchlist to database
         /// </summary>
         /// <param name="message"></param>
         public void SaveWatchList(out string message)
@@ -63,7 +67,7 @@ namespace StockInsight.BAL
                 {
                     if (context.Watchlist.Any())
                     {
-                        databaseService.SaveWatchlist(context.Watchlist);
+                        databaseService.SaveWatchlist(context.Watchlist.OrderBy(symbol => symbol.Id));
                     }
                 }
             }
@@ -74,7 +78,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Use stock data service to get company data
         /// </summary>
         public void GetStockCompanyData(string symbol, out string message)
         {
@@ -93,6 +97,10 @@ namespace StockInsight.BAL
             }
         }
 
+        /// <summary>
+        /// Get company data for each item in watchlist
+        /// </summary>
+        /// <param name="message"></param>
         public void GetAllStockCompanyData(out string message)
         {
             message = "";
@@ -104,7 +112,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Use stock data service to get quote data
         /// </summary>
         /// <param name="symbol"></param>
         public void GetStockQuoteData(string symbol, out string message)
@@ -126,7 +134,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Get quote data for each item in watchlist
         /// </summary>
         public void GetAllStockQuoteData(out string message)
         {
@@ -139,7 +147,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Use stock data service to get monthly data
         /// </summary>
         /// <param name="symbol"></param>
         public void GetStockMonthlyData(string symbol, out string message)
@@ -172,7 +180,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Get monthly data for each item in watchlist
         /// </summary>
         public void GetAllStockMonthlyData(out string message)
         {
@@ -185,7 +193,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Use stock data service to get daily data
         /// </summary>
         /// <param name="symbol"></param>
         public void GetStockDailyData(string symbol, out string message)
@@ -219,7 +227,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Get daily data for each item in watchlist
         /// </summary>
         public void GetAllStockDailyData(out string message)  
         {
@@ -232,7 +240,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Add stock symbol and company name to stock properties
         /// </summary>
         /// <param name="stock"></param>
         private void AddStockNameAndSymbol(Stock stock)
@@ -252,7 +260,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Logic for adding a stock to the watchlist with error handling
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
@@ -272,14 +280,13 @@ namespace StockInsight.BAL
 
                     if (message == "" || message == null)
                     {
-                        context.Stocks = context.Stocks.OrderBy(stock => stock.CompanyName).ToList();
+                        context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
                     }
                 }
                 else
                 {
                     throw new Exception();
                 }
-
             }
             else
             {
@@ -288,7 +295,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Logic for removing a stock from the watchlist
         /// </summary>
         /// <param name="symbol"></param>
         public void RemoveStockFromWatchlist(string symbol)
@@ -300,7 +307,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Create a new Ticker Symbol for an added stock to the watchlist
         /// </summary>
         /// <param name="tickerSymbols"></param>
         /// <param name="symbol"></param>
@@ -310,7 +317,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Return a stock by its symbol property
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="stocks"></param>
@@ -321,7 +328,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Check if a stock already exists in a list of stocks by its symbol property
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="stocks"></param>
@@ -340,7 +347,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Check if the user entered a valid symbol in the search textbox
         /// </summary>
         /// <param name="input"></param>
         /// <param name="message"></param>
@@ -349,9 +356,10 @@ namespace StockInsight.BAL
         {
             int maxSymbolLength = 15;
             bool valid = false;
+            string defaultText = "SEARCH...";
             message = "";
 
-            if (input != "" && input != null && input != "SEARCH...")
+            if (input != "" && input != null && input != defaultText)
             {
                 if (Regex.IsMatch(input, @"^[a-zA-Z.]+$"))
                 {
@@ -378,7 +386,23 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Good
+        /// Return a List of Stocks that is filtered by an input
+        /// Logic for getting the first x number of characters:
+        /// https://stackoverflow.com/questions/15941985/how-to-get-the-first-five-character-of-a-string
+        /// </summary>
+        /// <param name="stocks"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public List<Stock> ReturnFilteredStocks(List<Stock> stocks, string input)
+        {
+            input = input.ToUpper();
+            int length = input.Length;
+
+            return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
+        }
+
+        /// <summary>
+        /// Generate a new ticker symbol ID for a new stock that was added to the watchlist
         /// </summary>
         /// <param name="tickerSymbols"></param>
         /// <returns></returns>

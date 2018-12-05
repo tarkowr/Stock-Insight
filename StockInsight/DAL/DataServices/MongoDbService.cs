@@ -44,7 +44,7 @@ namespace StockInsight.DAL
         }
 
         /// <summary>
-        /// Write the current list of tickerSymbol to the mongoDb
+        /// Save the current list of tickerSymbol to the mongoDb
         /// </summary>
         /// <param name="tickerSymbol">list of tickerSymbols</param>
         public void SaveWatchlist(IEnumerable<TickerSymbol> tickerSymbol)

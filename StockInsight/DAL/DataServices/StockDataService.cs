@@ -11,6 +11,12 @@ namespace StockInsight.DAL
 {
     public class StockDataService : IStockDataService
     {
+
+        /// <summary>
+        /// Parse and return a Company object
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public Company GetStockCompanyData(string symbol)
         {
             string key = DataSettings.CompanyApi(symbol);
@@ -24,6 +30,11 @@ namespace StockInsight.DAL
             return company;
         }
 
+        /// <summary>
+        /// Parse and return a List of Day Charts
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public List<DayChart> GetStockDailyData(string symbol)
         {
             string key = DataSettings.DailyDataApi(symbol);
@@ -37,6 +48,11 @@ namespace StockInsight.DAL
             return dayChart;
         }
 
+        /// <summary>
+        /// Parse and return a List of MonthCharts
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public List<MonthChart> GetStockMonthlyData(string symbol)
         {
             string key = DataSettings.MonthlyDataApi(symbol);
@@ -50,6 +66,11 @@ namespace StockInsight.DAL
             return monthChart;
         }
 
+        /// <summary>
+        /// Parse and return a Quote object
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public Quote GetStockQuoteData(string symbol)
         {
             string key = DataSettings.QuoteApi(symbol);

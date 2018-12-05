@@ -9,12 +9,18 @@ namespace StockInsight.ExtensionMethods
 {
     public static class ExtensionMethods
     {
+        /// <summary>
+        /// Extension to convert a string to double and round it to 2 decimal places
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static double ConvertStringToDouble(this String str)
         {
             return Math.Round(double.Parse(str),2);
         }
 
         /// <summary>
+        /// Extension to convert a string to title case
         /// Credit to: https://stackoverflow.com/questions/1206019/converting-string-to-title-case
         /// </summary>
         /// <param name="text"></param>

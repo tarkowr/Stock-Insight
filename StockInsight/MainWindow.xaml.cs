@@ -33,12 +33,18 @@ namespace StockInsight
             LoadInData();
         }
 
+        /// <summary>
+        /// Instantiate global fields
+        /// </summary>
         private void InstantiateFields()
         {
             context = new Context();
             bal = new BusinessLayer(context);
         }
 
+        /// <summary>
+        /// Load in all of the required data for the dashboard window on its initial load
+        /// </summary>
         private void LoadInData()
         {
             bal.ReadSavedWatchlist(out message);
@@ -46,11 +52,21 @@ namespace StockInsight
             bal.GetAllStockDailyData(out message);
         }
 
+        /// <summary>
+        /// Exit Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        /// <summary>
+        /// Begin Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Begin_Click(object sender, RoutedEventArgs e)
         {
             Dashboard dashboard = new Dashboard(context, bal);
@@ -58,6 +74,11 @@ namespace StockInsight
             dashboard.ShowDialog();
         }
 
+        /// <summary>
+        /// Window Content Rendered
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void StockInsight_ContentRendered(object sender, EventArgs e)
         {
             if (message != "" && message != null)
