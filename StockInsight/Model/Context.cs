@@ -18,11 +18,14 @@ namespace StockInsight.Model
         public List<Stock> StockDaily { get; set; }
         public List<TickerSymbol> Watchlist { get; set; }
 
+        public List<Stock> Stocks { get; set; } 
+
         public Context()
         {
             StockIntraday = new List<Stock>();
             StockDaily = new List<Stock>();
             Watchlist = new List<TickerSymbol>();
+            Stocks = new List<Stock>();
         }
     }
 }

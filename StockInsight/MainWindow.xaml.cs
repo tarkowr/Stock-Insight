@@ -42,7 +42,8 @@ namespace StockInsight
         private void LoadInData()
         {
             bal.ReadSavedWatchlist(out message);
-            bal.ReadStockIntradayApiData(out message);
+            bal.GetAllStockCompanyData(out message);
+            bal.GetAllStockDailyData(out message);
         }
 
         private void Btn_Exit_Click(object sender, RoutedEventArgs e)

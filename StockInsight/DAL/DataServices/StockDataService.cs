@@ -1,81 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Avapi;
-using Avapi.AvapiTIME_SERIES_DAILY;
-using Avapi.AvapiTIME_SERIES_INTRADAY;
+using Newtonsoft.Json;
 using StockInsight.Model;
 
 namespace StockInsight.DAL
 {
-    public class StockDataService : IStockApiService
+    public class StockDataService : IStockDataService
     {
-        private int numberOfDays = 30;
-        private int numberOfIntervals = 78;
-
-        /// <summary>
-        /// Retrieve Stock Data via Alpha Vantage Api & Avapi Package //DAILY
-        /// </summary>
-        /// <param name="tickerSymbol"></param>
-        /// <returns></returns>
-        public Stock GetDailyStockApiData(string tickerSymbol)
+        public Company GetStockCompanyData(string symbol)
         {
-            var connection = SetupAvapiConnection();
+            string key = DataSettings.CompanyApi(symbol);
 
-            Int_TIME_SERIES_DAILY time_series_daily = connection.GetQueryObject_TIME_SERIES_DAILY();
-            IAvapiResponse_TIME_SERIES_DAILY time_series_dailyResponse =
-                time_series_daily.Query(tickerSymbol, Const_TIME_SERIES_DAILY.TIME_SERIES_DAILY_outputsize.compact);
+            Company company = new Company();
 
-            var data = time_series_dailyResponse.Data;
+            string result = HttpGetData(key);
 
-            Stock stock = new Stock();
+            company = JsonConvert.DeserializeObject<Company>(result);
 
-            stock.MetaData = new MetaData(data.MetaData.Information, data.MetaData.Symbol, data.MetaData.LastRefreshed, data.MetaData.OutputSize, data.MetaData.TimeZone);
+            return company;
+        }
 
-            foreach (var timeseries in data.TimeSeries.Take(numberOfDays))
-            {
-                stock.TimeSeries.Add(new TimeSeries(timeseries.open, timeseries.high, timeseries.low, timeseries.close, timeseries.volume, timeseries.DateTime));
-            }
+        public List<DayChart> GetStockDailyData(string symbol)
+        {
+            string key = DataSettings.DailyDataApi(symbol);
 
-            return stock;
+            List<DayChart> dayChart = new List<DayChart>();
+
+            string result = HttpGetData(key);
+
+            dayChart = JsonConvert.DeserializeObject<List<DayChart>>(result);
+
+            return dayChart;
+        }
+
+        public List<MonthChart> GetStockMonthlyData(string symbol)
+        {
+            string key = DataSettings.MonthlyDataApi(symbol);
+
+            List<MonthChart> monthChart = new List<MonthChart>();
+
+            string result = HttpGetData(key);
+
+            monthChart = JsonConvert.DeserializeObject<List<MonthChart>>(result);
+
+            return monthChart;
+        }
+
+        public Quote GetStockQuoteData(string symbol)
+        {
+            string key = DataSettings.QuoteApi(symbol);
+
+            Quote quote = new Quote();
+
+            string result = HttpGetData(key);
+
+            quote = JsonConvert.DeserializeObject<Quote>(result);
+
+            return quote;
         }
 
         /// <summary>
-        /// Retrieve Stock Data via Alpha Vantage Api & Avapi Package //INTRADAY
+        /// Use WebClient to make an API call
         /// </summary>
-        /// <param name="tickerSymbol"></param>
+        /// <param name="url"></param>
         /// <returns></returns>
-        public Stock GetIntradayStockApiData(string tickerSymbol)
+        static string HttpGetData(string url)
         {
-            var connection = SetupAvapiConnection();
+            string result = null;
 
-            Int_TIME_SERIES_INTRADAY time_series_intraday = connection.GetQueryObject_TIME_SERIES_INTRADAY();
-            IAvapiResponse_TIME_SERIES_INTRADAY time_series_intradayResponse =
-                time_series_intraday.Query(tickerSymbol, Const_TIME_SERIES_INTRADAY.TIME_SERIES_INTRADAY_interval.n_5min);
-
-            var data = time_series_intradayResponse.Data;
-
-            Stock stock = new Stock();
-
-            stock.MetaData = new MetaData(data.MetaData.Information, data.MetaData.Symbol, data.MetaData.LastRefreshed, data.MetaData.OutputSize, data.MetaData.TimeZone);
-
-            foreach (var timeseries in data.TimeSeries.Take(numberOfIntervals))
+            using (WebClient syncClient = new WebClient())
             {
-                stock.TimeSeries.Add(new TimeSeries(timeseries.open, timeseries.high, timeseries.low, timeseries.close, timeseries.volume, timeseries.DateTime));
+                result = syncClient.DownloadString(url);
             }
 
-            return stock;
-        }
-
-        private IAvapiConnection SetupAvapiConnection()
-        {
-            IAvapiConnection connection = AvapiConnection.Instance;
-
-            connection.Connect(DataSettings.alphaVantageApiKey);
-
-            return connection;
+            return result;
         }
     }
 }

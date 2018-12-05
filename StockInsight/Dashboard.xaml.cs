@@ -33,7 +33,7 @@ namespace StockInsight
             InitializeComponent();
             context = _context;
             bal = _bal;
-            BindToDataGrid(context.StockIntraday);
+            BindToDataGrid(context.Stocks);
             InitializeTimer(ResetTimer);
         }
 
@@ -47,7 +47,7 @@ namespace StockInsight
             message = "";
             try
             {
-                bal.ReadStockIntradayApiData(out message);
+                bal.GetAllStockDailyData(out message);
                 InitializeTimer(ResetTimer);
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace StockInsight
             {
                 if (message == "" || message == null)
                 {
-                    BindToDataGrid(context.StockIntraday);
+                    BindToDataGrid(context.Stocks);
                 }
             }
         }
@@ -104,6 +104,7 @@ namespace StockInsight
         private void Btn_Add_Click(object sender, RoutedEventArgs e)
         {
             string symbol = textBox_Search.Text.ToUpper();
+            message = "";
 
             if (bal.ValidSymbol(symbol, out message)) {
                 try
@@ -119,7 +120,7 @@ namespace StockInsight
                     if(message == "" || message == null)
                     {
                         lbl_SearchError.Content = "";
-                        BindToDataGrid(context.StockIntraday);
+                        BindToDataGrid(context.Stocks);
                     }
                     else
                     {

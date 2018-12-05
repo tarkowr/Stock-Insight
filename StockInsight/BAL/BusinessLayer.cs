@@ -14,8 +14,7 @@ namespace StockInsight.BAL
     {
         private Context context;
         private IDatabaseService databaseService;
-        private IStockApiService stockApiService;
-        private IStockLookupApiService stockLookupApiService;
+        private StockDataService stockDataService;
 
         public BusinessLayer(Context _context)
         {
@@ -26,10 +25,13 @@ namespace StockInsight.BAL
         private void InstantiateFields()
         {
             databaseService = new MongoDbService();
-            stockApiService = new StockDataService();
-            stockLookupApiService = new StockLookupService();
+            stockDataService = new StockDataService();
         }
 
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="message"></param>
         public void ReadSavedWatchlist(out string message)
         {
             message = "";
@@ -47,6 +49,10 @@ namespace StockInsight.BAL
             }
         }
 
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="message"></param>
         public void SaveWatchList(out string message)
         {
             message = "";
@@ -67,31 +73,86 @@ namespace StockInsight.BAL
             }
         }
 
-        public void ReadStockIntradayApiData(out string message)
+        /// <summary>
+        /// Good
+        /// </summary>
+        public void GetStockCompanyData(string symbol, out string message)
         {
+            Stock stock = new Stock();
             message = "";
 
             try
             {
-                context.StockIntraday.Clear();
+                stock.CompanyData = stockDataService.GetStockCompanyData(symbol);
+                AddStockNameAndSymbol(stock);
+                context.Stocks.Add(stock);
+            }
+            catch(Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
 
-                if(context.Watchlist.Any())
+        public void GetAllStockCompanyData(out string message)
+        {
+            message = "";
+
+            foreach (TickerSymbol t in context.Watchlist)
+            {
+                GetStockCompanyData(t.Symbol, out message);
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        public void GetStockQuoteData(string symbol, out string message)
+        {
+            Stock stock = new Stock();
+            message = "";
+
+            try
+            {
+                if(DoesStockExist(symbol, context.Stocks)){
+                    stock = GetStockBySymbol(symbol, context.Stocks);
+                    stock.QuoteData = stockDataService.GetStockQuoteData(symbol);
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        public void GetAllStockQuoteData(out string message)
+        {
+            message = "";
+
+            foreach (TickerSymbol t in context.Watchlist)
+            {
+                GetStockQuoteData(t.Symbol, out message);
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        public void GetStockMonthlyData(string symbol, out string message)
+        {
+            Stock stock = new Stock();
+            message = "";
+
+            try
+            {
+                if (DoesStockExist(symbol, context.Stocks))
                 {
-                    foreach (TickerSymbol t in context.Watchlist)
-                    {
-                        context.StockIntraday.Add(stockApiService.GetIntradayStockApiData(t.Symbol));
-                    }
-
-                    if (context.StockIntraday.Any())
-                    {
-                        foreach (Stock stock in context.StockIntraday)
-                        {
-                            if(stock.MetaData.Name == "" || stock.MetaData.Name == null)
-                            {
-                                GetSymbolNameAndAddToStock(stock, stock.MetaData.Symbol);
-                            }
-                        }
-                    }
+                    stock = GetStockBySymbol(symbol, context.Stocks);
+                    stock.MonthCharts = stockDataService.GetStockMonthlyData(symbol);
                 }
             }
             catch (Exception ex)
@@ -100,57 +161,125 @@ namespace StockInsight.BAL
             }
             finally
             {
-                context.StockIntraday = context.StockIntraday.OrderBy(s => s.MetaData.Name).ToList();
+                if (message == "" || message == null)
+                {
+                    if (stock.MonthCharts.Count >= 2)
+                    {
+                        stock.MonthCharts.Reverse();
+                    }
+                }
             }
         }
 
-        public void ReadStockDailyApiData(string symbol, out string message)
+        /// <summary>
+        /// Good
+        /// </summary>
+        public void GetAllStockMonthlyData(out string message)
         {
             message = "";
 
-            if (!StockExistsInModel(symbol, context.StockDaily))
+            foreach (TickerSymbol t in context.Watchlist)
             {
-                try
+                GetStockMonthlyData(t.Symbol, out message);
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        public void GetStockDailyData(string symbol, out string message)
+        {
+            Stock stock = new Stock();
+            message = "";
+
+            try
+            {
+                if (DoesStockExist(symbol, context.Stocks))
                 {
-                    context.StockDaily.Add(stockApiService.GetDailyStockApiData(symbol));
+                    stock = GetStockBySymbol(symbol, context.Stocks);
+                    stock.DayCharts = stockDataService.GetStockDailyData(symbol);
+                    stock.Close = stock.DayCharts.Last().close.ConvertStringToDouble();
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            finally
+            {
+                if (message == "" || message == null)
                 {
-                    message = ex.Message;
+                    if (stock.DayCharts.Count >= 2)
+                    {
+                        stock.DayCharts.Reverse();
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Good
+        /// </summary>
+        public void GetAllStockDailyData(out string message)  
+        {
+            message = "";
+
+            foreach (TickerSymbol t in context.Watchlist)
+            {
+                GetStockDailyData(t.Symbol, out message);    
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="stock"></param>
+        private void AddStockNameAndSymbol(Stock stock)
+        {
+            string symbol = stock.CompanyData.symbol;
+            string name = stock.CompanyData.companyName;
+
+            if(symbol != "" && symbol != null)
+            {
+                stock.Symbol = symbol.ToUpper();
+            }
+
+            if (name != "" && name != null)
+            {
+                stock.CompanyName = name;
+            }
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="message"></param>
         public void AddStockToWatchlist(string symbol, out string message)
         {
             message = "";
             symbol = symbol.ToUpper();
 
-            if (!StockExistsInModel(symbol, context.StockIntraday))
+            if (!DoesStockExist(symbol, context.Stocks))
             {
-                try
-                {
-                    Stock stock = stockApiService.GetIntradayStockApiData(symbol);
+                GetStockCompanyData(symbol, out message);
 
-                    if(stock != null)
-                    {
-                        GetSymbolNameAndAddToStock(stock, symbol);
-                        context.StockIntraday.Add(stock);
-                        CreateNewTickerSymbol(context.Watchlist, symbol);
-                    }
-                    else
-                    {
-                        message = $"{symbol} did not return any results."; 
-                    }
-                }
-                catch
+                if(DoesStockExist(symbol, context.Stocks))
                 {
-                    throw;
+                    GetStockDailyData(symbol, out message);
+                    CreateNewTickerSymbol(context.Watchlist, symbol);
+
+                    if (message == "" || message == null)
+                    {
+                        context.Stocks = context.Stocks.OrderBy(stock => stock.CompanyName).ToList();
+                    }
                 }
-                finally
+                else
                 {
-                    context.StockIntraday = context.StockIntraday.OrderBy(s => s.MetaData.Name).ToList();
+                    throw new Exception();
                 }
+
             }
             else
             {
@@ -158,43 +287,50 @@ namespace StockInsight.BAL
             }
         }
 
-        public bool ValidSymbol(string input, out string message)
-        {
-            bool valid = false;
-            message = "";
-
-            if(input != "" && input != null)
-            {
-                if(Regex.IsMatch(input, @"^[a-zA-Z.]+$"))
-                {
-                    valid = true;
-                }
-                else
-                {
-                    message = "Symbol can not contain numbers or special characters.";
-                }
-            }
-            else
-            {
-                message = "Symbol is empty.";
-            }
-
-            return valid;
-        }
-
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
         public void RemoveStockFromWatchlist(string symbol)
         {
-            if (StockExistsInModel(symbol, context.StockIntraday))
+            if (DoesStockExist(symbol, context.Stocks))
             {
-                context.StockIntraday = context.StockIntraday.Where(x => x.MetaData.Symbol != symbol).ToList();
+                context.Stocks = context.Stocks.Where(stock => stock.Symbol != symbol).ToList();
             }
         }
 
-        private bool StockExistsInModel(string symbol, List<Stock> stocks)
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="tickerSymbols"></param>
+        /// <param name="symbol"></param>
+        private void CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
+        {
+            tickerSymbols.Add(new TickerSymbol(HandleSymbolId(context.Watchlist), symbol));
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="stocks"></param>
+        /// <returns></returns>
+        private Stock GetStockBySymbol(string symbol, List<Stock> stocks)
+        {
+            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).First();
+        }
+
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="stocks"></param>
+        /// <returns></returns>
+        private bool DoesStockExist(string symbol, List<Stock> stocks)
         {
             foreach (Stock stock in stocks)
             {
-                if (stock.MetaData.Symbol == symbol.ToUpper())
+                if (stock.Symbol.ToUpper() == symbol.ToUpper())
                 {
                     return true;
                 }
@@ -203,17 +339,49 @@ namespace StockInsight.BAL
             return false;
         }
 
-        private void GetSymbolNameAndAddToStock(Stock stock, string symbol)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public bool ValidSymbol(string input, out string message)
         {
-            SymbolInformation symbolInformation = stockLookupApiService.GetStockSymbolInformation(symbol);
-            stock.MetaData.Name = symbolInformation.ResultSet.Result.First().name.ToTitleCase();
+            int maxSymbolLength = 15;
+            bool valid = false;
+            message = "";
+
+            if (input != "" && input != null && input != "SEARCH...")
+            {
+                if (Regex.IsMatch(input, @"^[a-zA-Z.]+$"))
+                {
+                    if (input.Length <= maxSymbolLength)
+                    {
+                        valid = true;
+                    }
+                    else
+                    {
+                        message = "Symbol is too long.";
+                    }
+                }
+                else
+                {
+                    message = "Symbol can not contain numbers or special characters.";
+                }
+            }
+            else
+            {
+                message = "Symbol is blank.";
+            }
+
+            return valid;
         }
 
-        private void CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
-        {
-            tickerSymbols.Add(new TickerSymbol(HandleSymbolId(context.Watchlist), symbol));
-        }
-
+        /// <summary>
+        /// Good
+        /// </summary>
+        /// <param name="tickerSymbols"></param>
+        /// <returns></returns>
         private int HandleSymbolId(List<TickerSymbol> tickerSymbols)
         {
             int uniqueId;

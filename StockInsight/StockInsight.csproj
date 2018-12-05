@@ -86,6 +86,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DAL\DataServices\StockDataService.cs" />
+    <Compile Include="DAL\Repositories\IStockDataService.cs" />
     <Compile Include="StockDetails.xaml.cs">
       <DependentUpon>StockDetails.xaml</DependentUpon>
     </Compile>
@@ -104,11 +106,7 @@
     <Compile Include="BAL\BusinessLayer.cs" />
     <Compile Include="DAL\Connections\DataSettings.cs" />
     <Compile Include="DAL\DataServices\MongoDbService.cs" />
-    <Compile Include="DAL\DataServices\StockDataService.cs" />
-    <Compile Include="DAL\DataServices\StockLookupService.cs" />
     <Compile Include="DAL\Repositories\IDatabaseService.cs" />
-    <Compile Include="DAL\Repositories\IStockApiService.cs" />
-    <Compile Include="DAL\Repositories\IStockLookupApiService.cs" />
     <Compile Include="Dashboard.xaml.cs">
       <DependentUpon>Dashboard.xaml</DependentUpon>
     </Compile>
@@ -125,7 +123,6 @@
   <ItemGroup>
     <Compile Include="Model\Context.cs" />
     <Compile Include="Model\Stock.cs" />
-    <Compile Include="Model\TickerSymbolLookup.cs" />
     <Compile Include="Model\TickerSymbol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
