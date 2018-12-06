@@ -25,6 +25,7 @@ namespace StockInsight
         private Context context;
         private BusinessLayer bal;
         private string message;
+        private bool errorOnLoad = false;
 
         public MainWindow()
         {
@@ -48,8 +49,21 @@ namespace StockInsight
         private void LoadInData()
         {
             bal.ReadSavedWatchlist(out message);
-            bal.GetAllStockCompanyData(out message);
-            bal.GetAllStockDailyData(out message);
+
+            if (bal.IsEmpty(message))
+            {
+                if (context.Watchlist.Any())
+                {
+                    bal.GetAllStockCompanyData(out message);
+                    bal.GetAllStockDailyData(out message);
+
+                    if (!bal.IsEmpty(message))
+                    {
+                        errorOnLoad = true;
+                        bal.GetAllStockMonthlyData(out message);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -81,7 +95,7 @@ namespace StockInsight
         /// <param name="e"></param>
         private void StockInsight_ContentRendered(object sender, EventArgs e)
         {
-            if (message != "" && message != null)
+            if (errorOnLoad)
             {
                 lbl_Error.Content = "WARNING: One or more errors ocurred while loading in data for this application.";
             }

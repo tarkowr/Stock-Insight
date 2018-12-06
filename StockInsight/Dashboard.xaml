@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StockInsight"
         mc:Ignorable="d"
-        Title="Dashboard" Height="600" Width="700" Closing="Window_Dashboard_Closing">
+        Title="Dashboard" Height="600" Width="700" Closing="Window_Dashboard_Closing" ContentRendered="Window_Dashboard_ContentRendered" Background="White">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="StyledButton">
             <Setter Property="Foreground" Value="#FF39DBB2"/>
@@ -61,6 +61,7 @@
             <RowDefinition Height="5*"/>
             <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
+
         <TextBox x:Name ="textBox_Search" HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="150" 
                  Grid.Row="1" TextWrapping="Wrap" Text="Search..." FontSize ="14" Foreground="#282828"
                  VerticalContentAlignment="Center" Margin="20,0,0,0" GotFocus="TextBox_Search_GotFocus" LostFocus="TextBox_Search_LostFocus" KeyUp="TextBox_Search_KeyUp"/>
@@ -68,7 +69,7 @@
                 HorizontalAlignment="Left" VerticalAlignment="Center"
                 Height="30" Width="75" Margin="180,0,0,0" Grid.Row="1" Click="Btn_Add_Click" />
         <Label x:Name="lbl_SearchError" Content="" HorizontalAlignment="Left" VerticalAlignment="Center"
-               Margin="265,0,0,0" Height="30" Grid.Row="1" Grid.ColumnSpan="2"/>
+               Margin="265,0,0,0" Height="30" Grid.Row="1" Grid.ColumnSpan="2" Foreground="#FF888888" FontWeight="ExtraLight"/>
 
         <Label x:Name="lbl_Watchlist" Content="Watchlist" HorizontalAlignment="Left" VerticalAlignment="Top"
                Margin="15,0,0,0" Grid.Row="2"  FontWeight="ExtraLight"
@@ -104,9 +105,17 @@
         <Button x:Name="btn_Details" Style="{StaticResource StyledButton}" Content="View" 
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="125" Height="50"
                 Grid.Row="3" Margin="20,20,0,0" Grid.Column="0" Click="Btn_Details_Click"/>
-        
+
+        <Button x:Name="btn_Remove" Style="{StaticResource StyledButton}" Content="Remove" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Width="125" Height="50"
+                Grid.Row="3" Margin="165,20,0,0" Grid.Column="0" Click="Btn_Remove_Click"/>
+
         <Button x:Name="btn_Exit" Style="{StaticResource StyledButton}" Content="Exit" 
                 HorizontalAlignment="Right" VerticalAlignment="Top" Width="125" Height="50"
                 Grid.Row="3" Margin="0,20,20,0" Click="Btn_Exit_Click" Grid.Column="1"/>
+        <Label x:Name="lbl_GetStarted" Content="Get started with Stock Insight by adding Stocks to your Watchlist!"
+               HorizontalAlignment="Left" VerticalAlignment="Top"
+               Grid.Row="2" Grid.ColumnSpan="2" Margin="15,50,15,0" Foreground="#FF888888"
+               FontSize="16" FontWeight="ExtraLight"/>
     </Grid>
 </Window>

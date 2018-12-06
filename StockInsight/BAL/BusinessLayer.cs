@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using StockInsight.Model;
 using StockInsight.DAL;
-using StockInsight.ExtensionMethods;
+using StockInsight.Utilities;
 using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 
 namespace StockInsight.BAL
 {
@@ -65,10 +66,7 @@ namespace StockInsight.BAL
             {
                 using (databaseService)
                 {
-                    if (context.Watchlist.Any())
-                    {
-                        databaseService.SaveWatchlist(context.Watchlist.OrderBy(symbol => symbol.Id));
-                    }
+                    databaseService.SaveWatchlist(context.Watchlist.OrderBy(symbol => symbol.Id));
                 }
             }
             catch (Exception ex)
@@ -88,12 +86,18 @@ namespace StockInsight.BAL
             try
             {
                 stock.CompanyData = stockDataService.GetStockCompanyData(symbol);
-                AddStockNameAndSymbol(stock);
                 context.Stocks.Add(stock);
             }
             catch(Exception ex)
             {
                 message = ex.Message;
+            }
+            finally
+            {
+                if (IsEmpty(message))
+                {
+                    AddStockNameAndSymbol(stock);
+                }
             }
         }
 
@@ -161,6 +165,11 @@ namespace StockInsight.BAL
                 {
                     stock = GetStockBySymbol(symbol, context.Stocks);
                     stock.MonthCharts = stockDataService.GetStockMonthlyData(symbol);
+
+                    if(stock.Close == 0)
+                    {
+                        stock.Close = stock.MonthCharts.Last().close.ConvertStringToDouble();
+                    }
                 }
             }
             catch (Exception ex)
@@ -169,12 +178,9 @@ namespace StockInsight.BAL
             }
             finally
             {
-                if (message == "" || message == null)
+                if (stock.MonthCharts.Count >= 2)
                 {
-                    if (stock.MonthCharts.Count >= 2)
-                    {
-                        stock.MonthCharts.Reverse();
-                    }
+                    stock.MonthCharts.Reverse();
                 }
             }
         }
@@ -199,6 +205,7 @@ namespace StockInsight.BAL
         public void GetStockDailyData(string symbol, out string message)
         {
             Stock stock = new Stock();
+            double close = 0;
             message = "";
 
             try
@@ -207,7 +214,13 @@ namespace StockInsight.BAL
                 {
                     stock = GetStockBySymbol(symbol, context.Stocks);
                     stock.DayCharts = stockDataService.GetStockDailyData(symbol);
-                    stock.Close = stock.DayCharts.Last().close.ConvertStringToDouble();
+                    close = stock.DayCharts.Last().close.ConvertStringToDouble();
+
+                    if (close != 0)
+                    {
+                        stock.Close = close;
+                    }
+                    
                 }
             }
             catch (Exception ex)
@@ -216,12 +229,9 @@ namespace StockInsight.BAL
             }
             finally
             {
-                if (message == "" || message == null)
+                if (stock.DayCharts.Count >= 2)
                 {
-                    if (stock.DayCharts.Count >= 2)
-                    {
-                        stock.DayCharts.Reverse();
-                    }
+                    stock.DayCharts.Reverse();
                 }
             }
         }
@@ -248,12 +258,12 @@ namespace StockInsight.BAL
             string symbol = stock.CompanyData.symbol;
             string name = stock.CompanyData.companyName;
 
-            if(symbol != "" && symbol != null)
+            if(!IsEmpty(symbol))
             {
                 stock.Symbol = symbol.ToUpper();
             }
 
-            if (name != "" && name != null)
+            if (!IsEmpty(name))
             {
                 stock.CompanyName = name;
             }
@@ -269,28 +279,37 @@ namespace StockInsight.BAL
             message = "";
             symbol = symbol.ToUpper();
 
-            if (!DoesStockExist(symbol, context.Stocks))
+            if (CheckWatchlistCount(context.Watchlist))
             {
-                GetStockCompanyData(symbol, out message);
-
-                if(DoesStockExist(symbol, context.Stocks))
+                if (!DoesStockExist(symbol, context.Stocks))
                 {
-                    GetStockDailyData(symbol, out message);
-                    CreateNewTickerSymbol(context.Watchlist, symbol);
+                    GetStockCompanyData(symbol, out message);
 
-                    if (message == "" || message == null)
+                    if (DoesStockExist(symbol, context.Stocks))
                     {
+                        GetStockDailyData(symbol, out message);
+                        CreateNewTickerSymbol(context.Watchlist, symbol);
+
+                        if (!IsEmpty(message))
+                        {
+                            GetAllStockMonthlyData(out message);
+                        }
+
                         context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
+                    }
+                    else
+                    {
+                        throw new Exception();
                     }
                 }
                 else
                 {
-                    throw new Exception();
+                    message = $"{symbol} is already in your Watchlist.";
                 }
             }
             else
             {
-                message = $"{symbol} is already in your Watchlist.";
+                message = $"Watchlist is full.";
             }
         }
 
@@ -302,7 +321,14 @@ namespace StockInsight.BAL
         {
             if (DoesStockExist(symbol, context.Stocks))
             {
-                context.Stocks = context.Stocks.Where(stock => stock.Symbol != symbol).ToList();
+                var stockToRemove = context.Stocks.SingleOrDefault(stock => stock.Symbol == symbol);
+                var symbolToRemove = context.Watchlist.SingleOrDefault(sym => sym.Symbol == symbol);
+
+                if(stockToRemove != null && symbolToRemove != null)
+                {
+                    context.Stocks.Remove(stockToRemove);
+                    context.Watchlist.Remove(symbolToRemove);
+                }
             }
         }
 
@@ -402,23 +428,31 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
+        /// Ensure that the Watchlist does not have too many stocks
+        /// </summary>
+        /// <param name="symbols"></param>
+        /// <returns></returns>
+        private bool CheckWatchlistCount(List<TickerSymbol> symbols)
+        {
+            int max = 30;
+
+            if(symbols.Count() >= max)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Generate a new ticker symbol ID for a new stock that was added to the watchlist
         /// </summary>
         /// <param name="tickerSymbols"></param>
         /// <returns></returns>
         private int HandleSymbolId(List<TickerSymbol> tickerSymbols)
         {
-            int uniqueId;
+            int uniqueId = 1000;
             List<int> ids = new List<int>();
-
-            if (!tickerSymbols.Any())
-            {
-                uniqueId = 1000;
-            }
-            else
-            {
-                uniqueId = tickerSymbols.Count() + 1000;
-            }
 
             foreach (var ts in tickerSymbols)
             {
@@ -431,6 +465,21 @@ namespace StockInsight.BAL
             }
 
             return uniqueId;
+        }
+
+        /// <summary>
+        /// Check if a string is null or empty
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public bool IsEmpty(string msg)
+        {
+            return string.IsNullOrEmpty(msg) ? true : false;
+        }
+
+        public bool IsWatchlistEmpty()
+        {
+            return context.Watchlist.Count > 0 ? false : true;
         }
     }
 }
