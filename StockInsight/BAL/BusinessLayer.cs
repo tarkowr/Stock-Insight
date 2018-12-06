@@ -348,7 +348,7 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="stocks"></param>
         /// <returns></returns>
-        private Stock GetStockBySymbol(string symbol, List<Stock> stocks)
+        public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
         {
             return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).First();
         }
@@ -400,12 +400,12 @@ namespace StockInsight.BAL
                 }
                 else
                 {
-                    message = "Symbol can not contain numbers or special characters.";
+                    message = "Invalid Symbol.";
                 }
             }
             else
             {
-                message = "Symbol is blank.";
+                message = "Empty Symbol.";
             }
 
             return valid;

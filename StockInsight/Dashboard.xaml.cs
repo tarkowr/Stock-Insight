@@ -166,7 +166,7 @@ namespace StockInsight
             finally
             {
                 ChangeMouseIcon(MouseIcons.DEFAULT);
-                BindToDataGrid(context.Stocks);
+                HandleBindingWithFilter();
             }
         }
 
@@ -176,7 +176,7 @@ namespace StockInsight
             {
                 Stock stock = (Stock)dataGrid_Dashboard.SelectedItem;
                 bal.RemoveStockFromWatchlist(stock.Symbol);
-                HandleRemovalWithFilter();
+                HandleBindingWithFilter();
                 DisplayGetStartedText();
             }
         }
@@ -199,7 +199,7 @@ namespace StockInsight
 
                 if(bal.IsEmpty(message))
                 {
-                    StockDetails stockDetails = new StockDetails(context);
+                    StockDetails stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks));
                     stockDetails.ShowDialog();
                 }
             }
@@ -275,7 +275,7 @@ namespace StockInsight
             }
         }
 
-        private void HandleRemovalWithFilter()
+        private void HandleBindingWithFilter()
         {
             string defaultText = "SEARCH...";
             string input = textBox_Search.Text.ToString();
