@@ -13,10 +13,15 @@ namespace StockInsight.Model
         LOADING
     }
 
+    public enum StockType
+    {
+        MONTH,
+        DAY
+    }
+
     public class Context
     {
         public List<TickerSymbol> Watchlist { get; set; }
-        //public List<Stock> Stocks { get; set; } 
         public List<Stock> Stocks { get; set; }
 
         public Context()

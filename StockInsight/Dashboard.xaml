@@ -117,6 +117,6 @@
         <Label x:Name="lbl_GetStarted" Content="Get started with Stock Insight by adding Stocks to your Watchlist!"
                HorizontalAlignment="Left" VerticalAlignment="Top"
                Grid.Row="2" Grid.ColumnSpan="2" Margin="15,50,15,0" Foreground="#FF888888"
-               FontSize="16" FontWeight="ExtraLight"/>
+               FontSize="16" FontWeight="ExtraLight" Visibility="Hidden"/>
     </Grid>
 </Window>

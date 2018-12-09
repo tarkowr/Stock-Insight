@@ -96,7 +96,7 @@ namespace StockInsight.BAL
             {
                 if (IsEmpty(message))
                 {
-                    AddStockNameAndSymbol(stock);
+                    PopulateStockProperties(stock);
                 }
             }
         }
@@ -122,6 +122,7 @@ namespace StockInsight.BAL
         public void GetStockQuoteData(string symbol, out string message)
         {
             Stock stock = new Stock();
+            double close = 0;
             message = "";
 
             try
@@ -134,6 +135,18 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 message = ex.Message;
+            }
+            finally
+            {
+                if (IsEmpty(message))
+                {
+                    close = stock.QuoteData.latestPrice.ConvertStringToDouble();
+
+                    if (close != 0)
+                    {
+                        stock.Close = close;
+                    }
+                }
             }
         }
 
@@ -205,7 +218,6 @@ namespace StockInsight.BAL
         public void GetStockDailyData(string symbol, out string message)
         {
             Stock stock = new Stock();
-            double close = 0;
             message = "";
 
             try
@@ -214,13 +226,6 @@ namespace StockInsight.BAL
                 {
                     stock = GetStockBySymbol(symbol, context.Stocks);
                     stock.DayCharts = stockDataService.GetStockDailyData(symbol);
-                    close = stock.DayCharts.Last().close.ConvertStringToDouble();
-
-                    if (close != 0)
-                    {
-                        stock.Close = close;
-                    }
-                    
                 }
             }
             catch (Exception ex)
@@ -253,12 +258,12 @@ namespace StockInsight.BAL
         /// Add stock symbol and company name to stock properties
         /// </summary>
         /// <param name="stock"></param>
-        private void AddStockNameAndSymbol(Stock stock)
+        private void PopulateStockProperties(Stock stock)
         {
             string symbol = stock.CompanyData.symbol;
             string name = stock.CompanyData.companyName;
 
-            if(!IsEmpty(symbol))
+            if (!IsEmpty(symbol))
             {
                 stock.Symbol = symbol.ToUpper();
             }
@@ -288,6 +293,7 @@ namespace StockInsight.BAL
                     if (DoesStockExist(symbol, context.Stocks))
                     {
                         GetStockDailyData(symbol, out message);
+                        GetStockQuoteData(symbol, out message);
                         CreateNewTickerSymbol(context.Watchlist, symbol);
 
                         if (!IsEmpty(message))

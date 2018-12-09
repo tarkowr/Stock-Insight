@@ -56,6 +56,7 @@ namespace StockInsight
                 {
                     bal.GetAllStockCompanyData(out message);
                     bal.GetAllStockDailyData(out message);
+                    bal.GetAllStockQuoteData(out message);
 
                     if (!bal.IsEmpty(message))
                     {

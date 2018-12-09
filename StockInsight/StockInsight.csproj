@@ -91,6 +91,7 @@
     <Compile Include="StockDetails.xaml.cs">
       <DependentUpon>StockDetails.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\WindowStyles.cs" />
     <Page Include="Dashboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

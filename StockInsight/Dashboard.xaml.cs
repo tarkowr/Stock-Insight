@@ -156,7 +156,8 @@ namespace StockInsight
 
             try
             {
-                bal.GetAllStockDailyData(out message);
+                //bal.GetAllStockDailyData(out message);
+                bal.GetAllStockQuoteData(out message);
                 InitializeTimer(ResetTimer);
             }
             catch (Exception ex)
@@ -194,6 +195,7 @@ namespace StockInsight
             {
                 Stock stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
+                bal.GetStockDailyData(stock.Symbol, out message);
                 bal.GetStockQuoteData(stock.Symbol, out message);
                 bal.GetStockMonthlyData(stock.Symbol, out message);
 

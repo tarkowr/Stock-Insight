@@ -26,7 +26,7 @@ namespace StockInsight.DAL
         }
         public static string DailyDataApi(string symbol)
         {
-            return $"https://api.iextrading.com/1.0/stock/{symbol}/chart/1d";
+            return $"https://api.iextrading.com/1.0/stock/{symbol}/chart/1d?chartInterval=5";
         }
     }
 }
