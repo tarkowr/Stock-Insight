@@ -29,6 +29,7 @@ namespace StockInsight
         Timer ResetTimer = new Timer();
         List<Stock> FilteredStocks;
         public static int refreshDisableTime = 10000;
+        public static string searchText = "Search...";
 
         public Dashboard(Context _context, BusinessLayer _bal)
         {
@@ -57,6 +58,11 @@ namespace StockInsight
             dataGrid_Dashboard.ItemsSource = observableCollection;
         }
 
+        /// <summary>
+        /// Window Content Rendered
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Dashboard_ContentRendered(object sender, EventArgs e)
         {
             DisplayGetStartedText();
@@ -69,7 +75,7 @@ namespace StockInsight
         /// <param name="e"></param>
         private void TextBox_Search_GotFocus(object sender, RoutedEventArgs e)
         {
-            if(textBox_Search.Text == "Search...")
+            if(textBox_Search.Text == searchText)
             {
                 textBox_Search.Text = "";
             }
@@ -84,7 +90,7 @@ namespace StockInsight
         {
             if (textBox_Search.Text == "")
             {
-                textBox_Search.Text = "Search...";
+                textBox_Search.Text = searchText;
                 lbl_SearchError.Content = "";
             }
         }
@@ -156,7 +162,6 @@ namespace StockInsight
 
             try
             {
-                //bal.GetAllStockDailyData(out message);
                 bal.GetAllStockQuoteData(out message);
                 InitializeTimer(ResetTimer);
             }
@@ -171,6 +176,11 @@ namespace StockInsight
             }
         }
 
+        /// <summary>
+        /// Remove Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Remove_Click(object sender, RoutedEventArgs e)
         {
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
@@ -201,7 +211,7 @@ namespace StockInsight
 
                 if(bal.IsEmpty(message))
                 {
-                    StockDetails stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks));
+                    StockDetails stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
                     stockDetails.ShowDialog();
                 }
             }
@@ -277,12 +287,14 @@ namespace StockInsight
             }
         }
 
+        /// <summary>
+        /// Bind to Datagrid when Filter might be applied
+        /// </summary>
         private void HandleBindingWithFilter()
         {
-            string defaultText = "SEARCH...";
             string input = textBox_Search.Text.ToString();
 
-            if (input.ToUpper() != defaultText)
+            if (input.ToUpper() != searchText.ToUpper())
             {
                 FilterBySearchText();
             }
@@ -314,6 +326,9 @@ namespace StockInsight
             });
         }
 
+        /// <summary>
+        /// Display get started text if Watchlist is empty
+        /// </summary>
         private void DisplayGetStartedText()
         {
             if (bal.IsWatchlistEmpty())

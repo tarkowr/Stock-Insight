@@ -69,7 +69,7 @@
                HorizontalAlignment="Center" VerticalAlignment="Bottom"
                Grid.ColumnSpan="2"/>
 
-        <lvc:CartesianChart x:Name="StockChart" Margin="60,20,40,20" Grid.Row="1" Grid.ColumnSpan="2" Series="{Binding SeriesCollection}" LegendLocation="Right" >
+        <lvc:CartesianChart x:Name="StockChart" Margin="60,0,40,20" Grid.Row="1" Grid.ColumnSpan="2" Series="{Binding SeriesCollection}" LegendLocation="None" >
             <lvc:CartesianChart.AxisY>
                 <lvc:Axis Title="" FontSize="12" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
             </lvc:CartesianChart.AxisY>
@@ -79,16 +79,16 @@
         </lvc:CartesianChart>
 
         <Grid x:Name="ChartGrid" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Top"
-              Height="30" Width="160">
+              Height="40" Width="160">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="btn_DayChart" Content="1d" Grid.Column="1" Margin="5,0,0,0"
+            <Button x:Name="btn_DayChart" Content="1d" Grid.Column="1" Margin="5,5,0,0"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource StyledButton}"
                 Width="60" Height="30" Click="Btn_DayChart_Click"/>
-            <Button x:Name="btn_MonthChart" Content="30d" Grid.Column="0" Margin="0,0,5,0"
+            <Button x:Name="btn_MonthChart" Content="30d" Grid.Column="0" Margin="0,5,5,0"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource StyledButton}"
                 Width="60" Height="30" Click="Btn_MonthChart_Click"/>
         </Grid>
@@ -97,39 +97,69 @@
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource StyledButton}"
                 Width="125" Height="50" Click="btn_Close_Click"/>
 
-        <Grid x:Name="CompanyInfo" HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Grid x:Name="CompanyInfo" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Grid.Row="2" Grid.RowSpan="2" Grid.ColumnSpan="2" 
-              Height="163" Margin="40,2,0,0" Width="600">
+              Margin="40,0,150,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Label x:Name="CompanyLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Company:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Column="0"/>
-            <Label x:Name="CompanyValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="77,10,0,0" VerticalAlignment="Top" Grid.Column="0"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label x:Name="CompanyLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Company:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="0"/>
+            <Label x:Name="CompanyValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="0"/>
 
-            <Label x:Name="CeoLabel" Style="{StaticResource LabelTitleThemeColor}" Content="CEO:" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Grid.Column="0"/>
-            <Label x:Name="CeoValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="77,40,0,0" VerticalAlignment="Top" Grid.Column="0"/>
+            <Label x:Name="CeoLabel" Style="{StaticResource LabelTitleThemeColor}" Content="CEO:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="1"/>
+            <Label x:Name="CeoValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="1"/>
 
-            <Label x:Name="IndustryLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Industry:" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Grid.Column="0"/>
-            <Label x:Name="IndustryValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="77,70,0,0" VerticalAlignment="Top" Grid.Column="0"/>
+            <Label x:Name="IndustryLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Industry:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="2"/>
+            <Label x:Name="IndustryValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="2"/>
 
-            <Label x:Name="WebsiteLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Website:" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Grid.Column="0"/>
-            <Label x:Name="WebsiteValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="77,100,0,0" VerticalAlignment="Top" Grid.Column="0"/>
+            <Label x:Name="WebsiteLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Website:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="3"/>
+            <Label x:Name="WebsiteValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="3"/>
 
-            <Label x:Name="ExchangeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Exchange:" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Grid.Column="0"/>
-            <Label x:Name="ExchangeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="77,130,0,0" VerticalAlignment="Top" Grid.Column="0"/>
+            <Label x:Name="ExchangeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Exchange:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="4"/>
+            <Label x:Name="ExchangeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="0" Grid.Row="4"/>
 
-            <Label x:Name="PeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="PE Ratio:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-            <Label x:Name="PeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+            <Label x:Name="PercentLabel" Style="{StaticResource LabelTitleThemeColor}" Content="% Change:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="0"/>
+            <Label x:Name="PercentValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="0"/>
 
-            <Label x:Name="WkHighLabel" Style="{StaticResource LabelTitleThemeColor}" Content="52Wk High:" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-            <Label x:Name="WkHighValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,40,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+            <Label x:Name="PeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="PE Ratio:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="3"/>
+            <Label x:Name="PeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="3"/>
 
-            <Label x:Name="WkLowLabel" Style="{StaticResource LabelTitleThemeColor}" Content="52Wk Low:" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-            <Label x:Name="WkLowValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,70,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+            <Label x:Name="WkHighLabel" Style="{StaticResource LabelTitleThemeColor}" Content="52Wk High:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="1"/>
+            <Label x:Name="WkHighValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="1"/>
 
-            <Label x:Name="VolumeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Volume:" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-            <Label x:Name="VolumeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,100,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+            <Label x:Name="WkLowLabel" Style="{StaticResource LabelTitleThemeColor}" Content="52Wk Low:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="2"/>
+            <Label x:Name="WkLowValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="2"/>
+
+            <Label x:Name="VolumeLabel" Style="{StaticResource LabelTitleThemeColor}" Content="Volume:" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="4"/>
+            <Label x:Name="VolumeValue" Style="{StaticResource LabelValueThemeColor}" Content="" HorizontalAlignment="Left" Margin="85,0,0,0" VerticalAlignment="Top"
+                   Grid.Column="1" Grid.Row="4"/>
         </Grid>
     </Grid>
 </Window>

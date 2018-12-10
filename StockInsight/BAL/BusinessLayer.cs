@@ -8,6 +8,7 @@ using StockInsight.DAL;
 using StockInsight.Utilities;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace StockInsight.BAL
 {
@@ -356,7 +357,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
         {
-            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).First();
+            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
         }
 
         /// <summary>
@@ -419,8 +420,6 @@ namespace StockInsight.BAL
 
         /// <summary>
         /// Return a List of Stocks that is filtered by an input
-        /// Logic for getting the first x number of characters:
-        /// https://stackoverflow.com/questions/15941985/how-to-get-the-first-five-character-of-a-string
         /// </summary>
         /// <param name="stocks"></param>
         /// <param name="input"></param>
@@ -483,9 +482,86 @@ namespace StockInsight.BAL
             return string.IsNullOrEmpty(msg) ? true : false;
         }
 
+        /// <summary>
+        /// Return true/false if Watchlist is empty
+        /// </summary>
+        /// <returns></returns>
         public bool IsWatchlistEmpty()
         {
             return context.Watchlist.Count > 0 ? false : true;
+        }
+
+        /// <summary>
+        /// Get the first price from a list of prices
+        /// </summary>
+        /// <param name="prices"></param>
+        /// <returns></returns>
+        public double GetFirstPrice(List<string> prices)
+        {
+            double price = 0;
+
+            try
+            {
+                price = prices.FirstOrDefault(x => x != null).ConvertStringToDouble();
+            }
+            catch { }
+
+            return price;
+        }
+
+        /// <summary>
+        /// Get the last price from a list of prices
+        /// </summary>
+        /// <param name="prices"></param>
+        /// <returns></returns>
+        public double GetLastPrice(List<string> prices)
+        {
+            double price = 0;
+            try
+            {
+                price = prices.LastOrDefault(x => x != null).ConvertStringToDouble();
+            }
+            catch { }
+
+            return price;
+        }
+
+        /// <summary>
+        /// Get Brush color based on open/close values
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
+        public Brush GetLineColor(double open, double close)
+        {
+            if (open > close)
+            {
+                return WindowStyles.RedSI;
+            }
+
+            return WindowStyles.GreenSI;
+        }
+
+        /// <summary>
+        /// Calculate the percent change between two values
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
+        public double CalculateChangePercentage(double open, double close)
+        {
+            return Math.Round((close - open) / open, 4) * 100;
+        }
+
+        /// <summary>
+        /// Calculate gain/loss from open to close
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
+        public double CalculateGainLoss(double open, double close)
+        {
+            return close - open;
         }
     }
 }

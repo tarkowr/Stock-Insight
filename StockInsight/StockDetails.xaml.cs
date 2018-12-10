@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using LiveCharts;
 using LiveCharts.Wpf;
 using StockInsight.Model;
+using StockInsight.BAL;
 using StockInsight.Utilities;
 
 namespace StockInsight
@@ -24,19 +25,24 @@ namespace StockInsight
     public partial class StockDetails : Window
     {
         private Stock stock;
+        private BusinessLayer bal;
         public SeriesCollection SeriesCollection { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> YFormatter { get; set; }
         private LineSeries line { get; set; }
         private StockType CurrentGraph { get; set; } 
 
-        public StockDetails(Stock _stock)
+        public StockDetails(Stock _stock, BusinessLayer _bal)
         {
             InitializeComponent();
             stock = _stock;
+            bal = _bal;
             SetUpWindow();
         }
 
+        /// <summary>
+        /// Initialize properties, create line graph, bind monthly data to graph
+        /// </summary>
         private void SetUpWindow()
         {
             CurrentGraph = StockType.MONTH;
@@ -49,21 +55,37 @@ namespace StockInsight
             InitializeLineGraphChart(stock.MonthCharts);
         }
 
+        /// <summary>
+        /// Change Window Title
+        /// </summary>
+        /// <param name="company"></param>
         private void AddNewTitleToWindow(string company)
         {
             Details.Title = $"{company} - Details";
         }
 
+        /// <summary>
+        /// Display stock symbol at top of window
+        /// </summary>
+        /// <param name="symbol"></param>
         private void BindSymbolToTop(string symbol)
         {
             lbl_Symbol.Content = symbol;
         }
 
+        /// <summary>
+        /// Display price above graph
+        /// </summary>
+        /// <param name="close"></param>
         private void BindCurrentPriceToTop(double close)
         {
             lbl_Price.Content = $"${close.ToString("F")}";
         }
 
+        /// <summary>
+        /// Add Line Series to Series Collection
+        /// </summary>
+        /// <param name="_line"></param>
         private void BindLineSeriesToCollection(LineSeries _line)
         {
             SeriesCollection.Clear();
@@ -73,39 +95,61 @@ namespace StockInsight
             DataContext = this;
         }
 
+        /// <summary>
+        /// Create new Line Graph and populate it with monthly data
+        /// </summary>
+        /// <param name="month"></param>
         private void InitializeLineGraphChart(List<MonthChart> month)
         {
             CreateNewLineSeries();
-            BindMonthlyDataToGrid(month);
+            BindMonthlyDataToGraph(month);
         }
 
-        private void BindMonthlyDataToGrid(List<MonthChart> month)
+        /// <summary>
+        /// Bind monthly data to line graph and update several fields
+        /// </summary>
+        /// <param name="month"></param>
+        private void BindMonthlyDataToGraph(List<MonthChart> month)
         {
             List<string> prices = month.Select(d => d.close).ToList();
+            double firstPrice = bal.GetFirstPrice(prices);
+            double lastPrice = bal.GetLastPrice(prices);
+
             CurrentGraph = StockType.MONTH;
 
-            line.Stroke = GetLineColor(GetLastPrice(prices), GetFirstPrice(prices));
+            BindPercentage(bal.CalculateChangePercentage(lastPrice, firstPrice), bal.CalculateGainLoss(lastPrice, firstPrice));
+            line.Stroke = bal.GetLineColor(lastPrice, firstPrice);
             line.Values = GetPrices(prices);
             Labels = BindMonthDatesToAxis(month);
             BindLineSeriesToCollection(line);
         }
 
-        private void BindDailyDataToGrid(List<DayChart> day)
+        /// <summary>
+        /// Bind daily data to graph and update several fields
+        /// </summary>
+        /// <param name="day"></param>
+        private void BindDailyDataToGraph(List<DayChart> day)
         {
             List<string> prices = day.Select(d => d.close).ToList();
+            double firstPrice = bal.GetFirstPrice(prices);
+            double lastPrice = bal.GetLastPrice(prices);
+
             CurrentGraph = StockType.DAY;
 
-            line.Stroke = GetLineColor(GetLastPrice(prices), GetFirstPrice(prices));
+            BindPercentage(bal.CalculateChangePercentage(lastPrice, firstPrice), bal.CalculateGainLoss(lastPrice, firstPrice));
+            line.Stroke = bal.GetLineColor(lastPrice, firstPrice);
             line.Values = GetPrices(prices);
             Labels = BindDayTimesToAxis(day);
             BindLineSeriesToCollection(line);
         }
 
+        /// <summary>
+        /// Instantiate new LineSeries with default values
+        /// </summary>
         private void CreateNewLineSeries()
         {
             line = new LineSeries
             {
-                Title = stock.Symbol,
                 Values = new ChartValues<double>(),
                 LineSmoothness = 0,
                 PointGeometrySize = 0,
@@ -117,6 +161,11 @@ namespace StockInsight
             YFormatter = value => value.ToString("C");
         }
 
+        /// <summary>
+        /// Return formatted and valid ChartValues
+        /// </summary>
+        /// <param name="prices"></param>
+        /// <returns></returns>
         private ChartValues<double> GetPrices(List<string> prices)
         {
             ChartValues<double> values = new ChartValues<double>();
@@ -135,16 +184,11 @@ namespace StockInsight
             return values;
         }
 
-        private Brush GetLineColor(double open, double close)
-        {
-            if (open > close)
-            {
-                return line.Stroke = WindowStyles.RedSI;
-            }
-
-            return line.Stroke = WindowStyles.GreenSI;
-        }
-
+        /// <summary>
+        /// Return an array of formatted and valid dates
+        /// </summary>
+        /// <param name="month"></param>
+        /// <returns></returns>
         private string[] BindMonthDatesToAxis(List<MonthChart> month)
         {
             List<string> labelList = new List<string>();
@@ -158,6 +202,11 @@ namespace StockInsight
             return labelList.ToArray();
         }
 
+        /// <summary>
+        /// Return an array of formatted and valid times
+        /// </summary>
+        /// <param name="day"></param>
+        /// <returns></returns>
         private string[] BindDayTimesToAxis(List<DayChart> day)
         {
             List<string> labelList = new List<string>();
@@ -172,53 +221,46 @@ namespace StockInsight
 
             return labelList.ToArray();
         }
-
+        
+        /// <summary>
+        /// Close Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_Close_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        /// <summary>
+        /// 30 Day Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_MonthChart_Click(object sender, RoutedEventArgs e)
         {
             if(CurrentGraph == StockType.DAY)
             {
-                BindMonthlyDataToGrid(stock.MonthCharts);
+                BindMonthlyDataToGraph(stock.MonthCharts);
             }
         }
 
+        /// <summary>
+        /// 1 Day Button Click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_DayChart_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentGraph == StockType.MONTH)
             {
-                BindDailyDataToGrid(stock.DayCharts);
+                BindDailyDataToGraph(stock.DayCharts);
             }
         }
 
-        private double GetFirstPrice(List<string> prices)
-        {
-            double price = 0;
-
-            try
-            {
-                price = prices.First(x => x != null).ConvertStringToDouble();
-            }
-            catch { }
-
-            return price;
-        }
-
-        private double GetLastPrice(List<string> prices)
-        {
-            double price = 0;
-            try
-            {
-                price = prices.Last(x => x != null).ConvertStringToDouble();
-            }
-            catch { }
-
-            return price;
-        }
-
+        /// <summary>
+        /// Populate window stats section with stock stats
+        /// </summary>
         private void BindStatsToWindow()
         {
             string company = stock.CompanyName;
@@ -230,7 +272,7 @@ namespace StockInsight
             string peRatio = stock.QuoteData.peRatio;
             string Wk52High = stock.QuoteData.week52High;
             string Wk52Low = stock.QuoteData.week52Low;
-            string volume = stock.MonthCharts.Last(x => x.volume != null).volume;
+            string volume = stock.MonthCharts.LastOrDefault(x => x.volume != null).volume;
 
             CompanyValue.Content = company;
             CeoValue.Content = ceo;
@@ -239,9 +281,42 @@ namespace StockInsight
             ExchangeValue.Content = exchange;
 
             PeValue.Content = peRatio;
-            WkHighValue.Content = $"${Wk52High}";
-            WkLowValue.Content = $"${Wk52Low}";
-            VolumeValue.Content = String.Format("{0:n}", volume);
+
+            if(Wk52High != null)
+            {
+                WkHighValue.Content = $"{String.Format("{0:C}", double.Parse(Wk52High))}";
+            }
+            if(Wk52Low != null)
+            {
+                WkLowValue.Content = $"{String.Format("{0:C}", double.Parse(Wk52Low))}";
+            }
+            if(volume != null)
+            {
+                VolumeValue.Content = String.Format("{0:n0}", long.Parse(volume));
+            }
+        }
+
+        /// <summary>
+        /// Bind percentage change and value change to stock stats section
+        /// </summary>
+        /// <param name="percentage"></param>
+        /// <param name="change"></param>
+        private void BindPercentage(double percentage, double change)
+        {
+            string symbol = "";
+            string currency = String.Format("{0:C}", change);
+
+            if (percentage > 0)
+            {
+                symbol = "+";
+                currency = $" (+{currency})";
+            }
+            else
+            {
+                currency = $" -{currency}";
+            }
+
+            PercentValue.Content = $"{symbol}{percentage}% {currency}";
         }
     }
 }

@@ -8,7 +8,7 @@
 * **Application Type:** Window Presentation Foundation (WPF)
 * **Persistence Type:** MongoDB & Web API
 * **Date Created:** 12/1/18
-* **Last Modified:** 12/2/18
+* **Last Modified:** 12/9/18
 
 ### Code Used from Online Resources
 
@@ -17,3 +17,5 @@
 * [Right Align the Text in a Datagrid Cell](https://stackoverflow.com/questions/7800367/how-to-get-a-wpf-datagrid-cell-to-right-align-without-making-the-selectable-area)
 
 * [Change Foreground Color of a Datagrid Column](https://stackoverflow.com/questions/42250358/wpf-text-foreground-color-of-whole-column-in-datagrid)
+
+* [Get the first X number of characters from a String](https://stackoverflow.com/questions/15941985/how-to-get-the-first-five-character-of-a-string)
