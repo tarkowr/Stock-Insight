@@ -9,9 +9,7 @@ namespace StockInsight.DAL
 {
     public interface IStockDataService
     {
-        Company GetStockCompanyData(string symbol);
+        RootObject GetMainStockData(string symbol);
         List<DayChart> GetStockDailyData(string symbol);
-        List<MonthChart> GetStockMonthlyData(string symbol);
-        Quote GetStockQuoteData(string symbol);
     }
 }

@@ -89,7 +89,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Width="1*" Binding="{Binding Path=Symbol}" Foreground="#282828" ElementStyle="{StaticResource LeftCellMargin}"/>
                 <DataGridTextColumn Width="4*" Binding="{Binding Path=CompanyName}" Foreground="#282828" />
-                <DataGridTextColumn Width="1*" Binding="{Binding Path=Close}" ElementStyle="{StaticResource RightCell}"/>
+                <DataGridTextColumn Width="1*" Binding="{Binding Path=FormattedClose}" ElementStyle="{StaticResource RightCell}"/>
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" 

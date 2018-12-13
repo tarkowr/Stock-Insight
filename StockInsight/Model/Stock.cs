@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StockInsight.Utilities;
+using Newtonsoft.Json;
 
 namespace StockInsight.Model
 {
@@ -11,17 +12,19 @@ namespace StockInsight.Model
     {
         public string Symbol { get; set; }
         public string CompanyName { get; set; }
-        public double Close { get; set; }  
+        public double Close { get; set; }
+        public string FormattedClose { get; set; }
+
         public Company CompanyData { get; set; }    
         public Quote QuoteData { get; set; }
-        public List<MonthChart> MonthCharts { get; set; }
+        public List<Chart> MonthCharts { get; set; }
         public List<DayChart> DayCharts { get; set; }
 
         public Stock()
         {
             CompanyData = new Company();
             QuoteData = new Quote();
-            MonthCharts = new List<MonthChart>();
+            MonthCharts = new List<Chart>();
             DayCharts = new List<DayChart>();
         }
     }
@@ -70,7 +73,7 @@ namespace StockInsight.Model
         public string ytdChange { get; set; }
     }
 
-    public class MonthChart
+    public class Chart
     {
         public string date { get; set; }
         public string open { get; set; }
@@ -123,5 +126,12 @@ namespace StockInsight.Model
         public string issueType { get; set; }
         public string sector { get; set; }
         public List<string> tags { get; set; }
+    }
+
+    public class RootObject
+    {
+        public Quote quote { get; set; }
+        public Company company { get; set; }    
+        public List<Chart> chart { get; set; }
     }
 }

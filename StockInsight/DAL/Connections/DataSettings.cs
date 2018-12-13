@@ -12,21 +12,13 @@ namespace StockInsight.DAL
         public static string mongoDbDatabase = "StockInsight";
         public static string mongoDbCollection = "ticker_symbols";
 
-        public static string CompanyApi(string symbol)
-        {
-            return $"https://api.iextrading.com/1.0/stock/{symbol}/company";
-        }
-        public static string QuoteApi(string symbol)
-        {
-            return $"https://api.iextrading.com/1.0/stock/{symbol}/quote/1m";
-        }
-        public static string MonthlyDataApi(string symbol)
-        {
-            return $"https://api.iextrading.com/1.0/stock/{symbol}/chart/1m";
-        }
         public static string DailyDataApi(string symbol)
         {
             return $"https://api.iextrading.com/1.0/stock/{symbol}/chart/1d?chartInterval=5";
+        }
+        public static string QuoteCompanyMonthlyData(string symbol)
+        {
+            return $"https://api.iextrading.com/1.0/stock/{symbol}/batch?types=quote,company,chart&range=1m";
         }
     }
 }

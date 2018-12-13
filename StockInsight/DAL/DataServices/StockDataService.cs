@@ -11,23 +11,22 @@ namespace StockInsight.DAL
 {
     public class StockDataService : IStockDataService
     {
-
         /// <summary>
-        /// Parse and return a Company object
+        /// Parse and return a RootObject object with Company, Quote, and Monthly data
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public Company GetStockCompanyData(string symbol)
+        public RootObject GetMainStockData(string symbol)
         {
-            string key = DataSettings.CompanyApi(symbol);
+            string key = DataSettings.QuoteCompanyMonthlyData(symbol);
 
-            Company company = new Company();
+            RootObject rootObject = new RootObject();
 
             string result = HttpGetData(key);
 
-            company = JsonConvert.DeserializeObject<Company>(result);
+            rootObject = JsonConvert.DeserializeObject<RootObject>(result);
 
-            return company;
+            return rootObject;
         }
 
         /// <summary>
@@ -46,42 +45,6 @@ namespace StockInsight.DAL
             dayChart = JsonConvert.DeserializeObject<List<DayChart>>(result);
 
             return dayChart;
-        }
-
-        /// <summary>
-        /// Parse and return a List of MonthCharts
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        public List<MonthChart> GetStockMonthlyData(string symbol)
-        {
-            string key = DataSettings.MonthlyDataApi(symbol);
-
-            List<MonthChart> monthChart = new List<MonthChart>();
-
-            string result = HttpGetData(key);
-
-            monthChart = JsonConvert.DeserializeObject<List<MonthChart>>(result);
-
-            return monthChart;
-        }
-
-        /// <summary>
-        /// Parse and return a Quote object
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        public Quote GetStockQuoteData(string symbol)
-        {
-            string key = DataSettings.QuoteApi(symbol);
-
-            Quote quote = new Quote();
-
-            string result = HttpGetData(key);
-
-            quote = JsonConvert.DeserializeObject<Quote>(result);
-
-            return quote;
         }
 
         /// <summary>

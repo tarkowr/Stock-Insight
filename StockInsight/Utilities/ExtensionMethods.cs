@@ -19,6 +19,11 @@ namespace StockInsight.Utilities
             return Math.Round(double.Parse(str),2);
         }
 
+        public static string FormatStockPrice(this Double val)
+        {
+            return $"${val.ToString("F")}";
+        }
+
         /// <summary>
         /// Extension to convert a string to title case
         /// Credit to: https://stackoverflow.com/questions/1206019/converting-string-to-title-case

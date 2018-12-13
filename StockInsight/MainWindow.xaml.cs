@@ -54,14 +54,11 @@ namespace StockInsight
             {
                 if (context.Watchlist.Any())
                 {
-                    bal.GetAllStockCompanyData(out message);
-                    bal.GetAllStockDailyData(out message);
-                    bal.GetAllStockQuoteData(out message);
+                    bal.GetAllMainStockData(out message);
 
                     if (!bal.IsEmpty(message))
                     {
                         errorOnLoad = true;
-                        bal.GetAllStockMonthlyData(out message);
                     }
                 }
             }

@@ -79,7 +79,7 @@ namespace StockInsight
         /// <param name="close"></param>
         private void BindCurrentPriceToTop(double close)
         {
-            lbl_Price.Content = $"${close.ToString("F")}";
+            lbl_Price.Content = close.FormatStockPrice();
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace StockInsight
         /// Create new Line Graph and populate it with monthly data
         /// </summary>
         /// <param name="month"></param>
-        private void InitializeLineGraphChart(List<MonthChart> month)
+        private void InitializeLineGraphChart(List<Chart> month)
         {
             CreateNewLineSeries();
             BindMonthlyDataToGraph(month);
@@ -109,7 +109,7 @@ namespace StockInsight
         /// Bind monthly data to line graph and update several fields
         /// </summary>
         /// <param name="month"></param>
-        private void BindMonthlyDataToGraph(List<MonthChart> month)
+        private void BindMonthlyDataToGraph(List<Chart> month)
         {
             List<string> prices = month.Select(d => d.close).ToList();
             double firstPrice = bal.GetFirstPrice(prices);
@@ -189,7 +189,7 @@ namespace StockInsight
         /// </summary>
         /// <param name="month"></param>
         /// <returns></returns>
-        private string[] BindMonthDatesToAxis(List<MonthChart> month)
+        private string[] BindMonthDatesToAxis(List<Chart> month)
         {
             List<string> labelList = new List<string>();
 
@@ -313,7 +313,7 @@ namespace StockInsight
             }
             else
             {
-                currency = $" -{currency}";
+                currency = $" (-{currency})";
             }
 
             PercentValue.Content = $"{symbol}{percentage}% {currency}";

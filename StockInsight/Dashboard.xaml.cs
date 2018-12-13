@@ -162,8 +162,7 @@ namespace StockInsight
 
             try
             {
-                bal.GetAllStockQuoteData(out message);
-                InitializeTimer(ResetTimer);
+                bal.GetAllMainStockData(out message);
             }
             catch (Exception ex)
             {
@@ -171,8 +170,9 @@ namespace StockInsight
             }
             finally
             {
-                ChangeMouseIcon(MouseIcons.DEFAULT);
+                InitializeTimer(ResetTimer);
                 HandleBindingWithFilter();
+                ChangeMouseIcon(MouseIcons.DEFAULT);
             }
         }
 
@@ -206,8 +206,7 @@ namespace StockInsight
                 Stock stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
                 bal.GetStockDailyData(stock.Symbol, out message);
-                bal.GetStockQuoteData(stock.Symbol, out message);
-                bal.GetStockMonthlyData(stock.Symbol, out message);
+                bal.GetMainStockData(stock.Symbol, out message);
 
                 if(bal.IsEmpty(message))
                 {

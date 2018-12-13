@@ -14,6 +14,7 @@ namespace StockInsight.BAL
 {
     public class BusinessLayer
     {
+        #region Fields and Constructors
         private Context context;
         private IDatabaseService databaseService;
         private StockDataService stockDataService;
@@ -32,7 +33,9 @@ namespace StockInsight.BAL
             databaseService = new MongoDbService();
             stockDataService = new StockDataService();
         }
+        #endregion
 
+        #region Database Service
         /// <summary>
         /// Read in Watchlist from database
         /// </summary>
@@ -75,143 +78,9 @@ namespace StockInsight.BAL
                 message = ex.Message;
             }
         }
+        #endregion
 
-        /// <summary>
-        /// Use stock data service to get company data
-        /// </summary>
-        public void GetStockCompanyData(string symbol, out string message)
-        {
-            Stock stock = new Stock();
-            message = "";
-
-            try
-            {
-                stock.CompanyData = stockDataService.GetStockCompanyData(symbol);
-                context.Stocks.Add(stock);
-            }
-            catch(Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                if (IsEmpty(message))
-                {
-                    PopulateStockProperties(stock);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get company data for each item in watchlist
-        /// </summary>
-        /// <param name="message"></param>
-        public void GetAllStockCompanyData(out string message)
-        {
-            message = "";
-
-            foreach (TickerSymbol t in context.Watchlist)
-            {
-                GetStockCompanyData(t.Symbol, out message);
-            }
-        }
-
-        /// <summary>
-        /// Use stock data service to get quote data
-        /// </summary>
-        /// <param name="symbol"></param>
-        public void GetStockQuoteData(string symbol, out string message)
-        {
-            Stock stock = new Stock();
-            double close = 0;
-            message = "";
-
-            try
-            {
-                if(DoesStockExist(symbol, context.Stocks)){
-                    stock = GetStockBySymbol(symbol, context.Stocks);
-                    stock.QuoteData = stockDataService.GetStockQuoteData(symbol);
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                if (IsEmpty(message))
-                {
-                    close = stock.QuoteData.latestPrice.ConvertStringToDouble();
-
-                    if (close != 0)
-                    {
-                        stock.Close = close;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get quote data for each item in watchlist
-        /// </summary>
-        public void GetAllStockQuoteData(out string message)
-        {
-            message = "";
-
-            foreach (TickerSymbol t in context.Watchlist)
-            {
-                GetStockQuoteData(t.Symbol, out message);
-            }
-        }
-
-        /// <summary>
-        /// Use stock data service to get monthly data
-        /// </summary>
-        /// <param name="symbol"></param>
-        public void GetStockMonthlyData(string symbol, out string message)
-        {
-            Stock stock = new Stock();
-            message = "";
-
-            try
-            {
-                if (DoesStockExist(symbol, context.Stocks))
-                {
-                    stock = GetStockBySymbol(symbol, context.Stocks);
-                    stock.MonthCharts = stockDataService.GetStockMonthlyData(symbol);
-
-                    if(stock.Close == 0)
-                    {
-                        stock.Close = stock.MonthCharts.Last().close.ConvertStringToDouble();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                if (stock.MonthCharts.Count >= 2)
-                {
-                    stock.MonthCharts.Reverse();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get monthly data for each item in watchlist
-        /// </summary>
-        public void GetAllStockMonthlyData(out string message)
-        {
-            message = "";
-
-            foreach (TickerSymbol t in context.Watchlist)
-            {
-                GetStockMonthlyData(t.Symbol, out message);
-            }
-        }
-
+        #region Stock Data Service
         /// <summary>
         /// Use stock data service to get daily data
         /// </summary>
@@ -245,13 +114,107 @@ namespace StockInsight.BAL
         /// <summary>
         /// Get daily data for each item in watchlist
         /// </summary>
-        public void GetAllStockDailyData(out string message)  
+        public void GetAllStockDailyData(out string message)
         {
             message = "";
 
             foreach (TickerSymbol t in context.Watchlist)
             {
-                GetStockDailyData(t.Symbol, out message);    
+                GetStockDailyData(t.Symbol, out message);
+            }
+        }
+
+        /// <summary>
+        /// Use stock data service to get company, quote, monthly data
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="message"></param>
+        public void GetMainStockData(string symbol, out string message)
+        {
+            Stock stock = new Stock();
+            RootObject rootObject = new RootObject();
+            message = "";
+
+            try
+            {
+                rootObject = stockDataService.GetMainStockData(symbol);
+
+                if (DoesStockExist(symbol, context.Stocks))
+                {
+                    stock = GetStockBySymbol(symbol, context.Stocks);
+                    BindRootObjectToStock(stock, rootObject);
+                }
+                else
+                {
+                    BindRootObjectToStock(stock, rootObject);
+                    context.Stocks.Add(stock);
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            finally
+            {
+                if (stock.MonthCharts.Count >= 2)
+                {
+                    stock.MonthCharts.Reverse();
+                }
+
+                BindPriceToStockProperty(stock);
+                PopulateStockProperties(stock);
+            }
+        }
+
+        /// <summary>
+        /// Get company, quote, and monthly data foreach stock in watchlist
+        /// </summary>
+        /// <param name="message"></param>
+        public void GetAllMainStockData(out string message)
+        {
+            message = "";
+
+            foreach (TickerSymbol t in context.Watchlist)
+            {
+                GetMainStockData(t.Symbol, out message);
+            }
+        }
+        #endregion
+
+        #region Binding Stock Properties
+        /// <summary>
+        /// Set Stock properties equal to RootObject properties
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <param name="rootObject"></param>
+        public void BindRootObjectToStock(Stock stock, RootObject rootObject)
+        {
+            stock.CompanyData = rootObject.company;
+            stock.QuoteData = rootObject.quote;
+            stock.MonthCharts = rootObject.chart;
+        }
+
+        /// <summary>
+        /// Bind close and formattedClose Stock Properties
+        /// </summary>
+        /// <param name="stock"></param>
+        private void BindPriceToStockProperty(Stock stock)
+        {
+            double close = 0;
+
+            close = stock.QuoteData.latestPrice.ConvertStringToDouble();
+
+            if (close == 0)
+            {
+                close = stock.MonthCharts.LastOrDefault(st => st.close != null).close.ConvertStringToDouble();
+
+                stock.Close = close;
+                stock.FormattedClose = close.FormatStockPrice();
+            }
+            else
+            {
+                stock.Close = close;
+                stock.FormattedClose = close.FormatStockPrice();
             }
         }
 
@@ -274,7 +237,9 @@ namespace StockInsight.BAL
                 stock.CompanyName = name;
             }
         }
+        #endregion
 
+        #region Watchlist Controls
         /// <summary>
         /// Logic for adding a stock to the watchlist with error handling
         /// </summary>
@@ -289,19 +254,11 @@ namespace StockInsight.BAL
             {
                 if (!DoesStockExist(symbol, context.Stocks))
                 {
-                    GetStockCompanyData(symbol, out message);
+                    GetMainStockData(symbol, out message);
 
                     if (DoesStockExist(symbol, context.Stocks))
                     {
-                        GetStockDailyData(symbol, out message);
-                        GetStockQuoteData(symbol, out message);
                         CreateNewTickerSymbol(context.Watchlist, symbol);
-
-                        if (!IsEmpty(message))
-                        {
-                            GetAllStockMonthlyData(out message);
-                        }
-
                         context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
                     }
                     else
@@ -331,35 +288,16 @@ namespace StockInsight.BAL
                 var stockToRemove = context.Stocks.SingleOrDefault(stock => stock.Symbol == symbol);
                 var symbolToRemove = context.Watchlist.SingleOrDefault(sym => sym.Symbol == symbol);
 
-                if(stockToRemove != null && symbolToRemove != null)
+                if (stockToRemove != null && symbolToRemove != null)
                 {
                     context.Stocks.Remove(stockToRemove);
                     context.Watchlist.Remove(symbolToRemove);
                 }
             }
         }
+        #endregion
 
-        /// <summary>
-        /// Create a new Ticker Symbol for an added stock to the watchlist
-        /// </summary>
-        /// <param name="tickerSymbols"></param>
-        /// <param name="symbol"></param>
-        private void CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
-        {
-            tickerSymbols.Add(new TickerSymbol(HandleSymbolId(context.Watchlist), symbol));
-        }
-
-        /// <summary>
-        /// Return a stock by its symbol property
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="stocks"></param>
-        /// <returns></returns>
-        public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
-        {
-            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
-        }
-
+        #region Validation
         /// <summary>
         /// Check if a stock already exists in a list of stocks by its symbol property
         /// </summary>
@@ -419,6 +357,89 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
+        /// Ensure that the Watchlist does not have too many stocks
+        /// </summary>
+        /// <param name="symbols"></param>
+        /// <returns></returns>
+        private bool CheckWatchlistCount(List<TickerSymbol> symbols)
+        {
+            int max = 30;
+
+            if (symbols.Count() >= max)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Check if a string is null or empty
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public bool IsEmpty(string msg)
+        {
+            return string.IsNullOrEmpty(msg) ? true : false;
+        }
+
+        /// <summary>
+        /// Return true/false if Watchlist is empty
+        /// </summary>
+        /// <returns></returns>
+        public bool IsWatchlistEmpty()
+        {
+            return context.Watchlist.Count > 0 ? false : true;
+        }
+        #endregion
+
+        #region Calculations
+        /// <summary>
+        /// Calculate the percent change between two values
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
+        public double CalculateChangePercentage(double open, double close)
+        {
+            return Math.Round((close - open) / open, 4) * 100;
+        }
+
+        /// <summary>
+        /// Calculate gain/loss from open to close
+        /// </summary>
+        /// <param name="open"></param>
+        /// <param name="close"></param>
+        /// <returns></returns>
+        public double CalculateGainLoss(double open, double close)
+        {
+            return close - open;
+        }
+        #endregion
+
+        #region Helpers
+        /// <summary>
+        /// Create a new Ticker Symbol for an added stock to the watchlist
+        /// </summary>
+        /// <param name="tickerSymbols"></param>
+        /// <param name="symbol"></param>
+        private void CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
+        {
+            tickerSymbols.Add(new TickerSymbol(HandleSymbolId(context.Watchlist), symbol));
+        }
+
+        /// <summary>
+        /// Return a stock by its symbol property
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="stocks"></param>
+        /// <returns></returns>
+        public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
+        {
+            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Return a List of Stocks that is filtered by an input
         /// </summary>
         /// <param name="stocks"></param>
@@ -430,23 +451,6 @@ namespace StockInsight.BAL
             int length = input.Length;
 
             return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
-        }
-
-        /// <summary>
-        /// Ensure that the Watchlist does not have too many stocks
-        /// </summary>
-        /// <param name="symbols"></param>
-        /// <returns></returns>
-        private bool CheckWatchlistCount(List<TickerSymbol> symbols)
-        {
-            int max = 30;
-
-            if(symbols.Count() >= max)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -470,25 +474,6 @@ namespace StockInsight.BAL
             }
 
             return uniqueId;
-        }
-
-        /// <summary>
-        /// Check if a string is null or empty
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
-        public bool IsEmpty(string msg)
-        {
-            return string.IsNullOrEmpty(msg) ? true : false;
-        }
-
-        /// <summary>
-        /// Return true/false if Watchlist is empty
-        /// </summary>
-        /// <returns></returns>
-        public bool IsWatchlistEmpty()
-        {
-            return context.Watchlist.Count > 0 ? false : true;
         }
 
         /// <summary>
@@ -541,27 +526,6 @@ namespace StockInsight.BAL
 
             return WindowStyles.GreenSI;
         }
-
-        /// <summary>
-        /// Calculate the percent change between two values
-        /// </summary>
-        /// <param name="open"></param>
-        /// <param name="close"></param>
-        /// <returns></returns>
-        public double CalculateChangePercentage(double open, double close)
-        {
-            return Math.Round((close - open) / open, 4) * 100;
-        }
-
-        /// <summary>
-        /// Calculate gain/loss from open to close
-        /// </summary>
-        /// <param name="open"></param>
-        /// <param name="close"></param>
-        /// <returns></returns>
-        public double CalculateGainLoss(double open, double close)
-        {
-            return close - open;
-        }
+        #endregion
     }
 }
