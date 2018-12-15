@@ -8,7 +8,7 @@
 * **Application Type:** Window Presentation Foundation (WPF)
 * **Persistence Type:** MongoDB & Web API
 * **Date Created:** 12/1/18
-* **Last Modified:** 12/9/18
+* **Last Modified:** 12/12/18
 
 ### Code Used from Online Resources
 
