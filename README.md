@@ -1,8 +1,6 @@
-﻿# Stock Insight
+# Stock Insight
 
-### Author: Richie Tarkowski
-
-### Applcation Details
+### Details
 
 * **Description:** Stock Insight is a WPF application that allows users to view data about each Stock in their Watchlist.
 * **Application Type:** Window Presentation Foundation (WPF)
