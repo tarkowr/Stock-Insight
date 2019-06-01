@@ -62,6 +62,10 @@ namespace StockInsight
                     }
                 }
             }
+            else
+            {
+                errorOnLoad = true;
+            }
         }
 
         /// <summary>

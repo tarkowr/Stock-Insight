@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Stock Insight" Height="400" Width="550" ContentRendered="StockInsight_ContentRendered">
     <Window.Resources>
-        <Style TargetType="{x:Type Button}">
+        <Style TargetType="{x:Type Button}" x:Key="primary">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -24,6 +24,28 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#3bf9c9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="secondary">
+            <Setter Property="Foreground" Value="#FF39DBB2"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="White" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF39DBB2"/>
+                    <Setter Property="Foreground" Value="White"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -46,10 +68,10 @@
                Content="Stock Insight" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" 
                FontWeight="ExtraLight" FontSize="50" Foreground="White" 
                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <Button x:Name="btn_Begin" Content="Begin" HorizontalAlignment="Right" Grid.Row="3" 
+        <Button x:Name="btn_Begin" Style="{StaticResource secondary}" Content="Begin" HorizontalAlignment="Right" Grid.Row="3" 
                 Margin="0, 0, 30, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight"
                 Click="Btn_Begin_Click"/>
-        <Button x:Name="btn_Exit" Content="Exit" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1" 
+        <Button x:Name="btn_Exit" Style="{StaticResource primary}" Content="Exit" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1" 
                 Margin="30, 0, 0, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight"
                 Click="Btn_Exit_Click">
         </Button>
