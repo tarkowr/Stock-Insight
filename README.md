@@ -1,4 +1,4 @@
-﻿# Stock Insight
+# Stock Insight
 
 Developed a simple, responsive Windows Presentation Foundation (WPF) stock application that includes persistence and real-time stock data. 
 
