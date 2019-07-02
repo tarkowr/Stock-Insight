@@ -54,7 +54,7 @@ namespace StockInsight
         /// <param name="stocks"></param>
         private void BindToDataGrid(List<Stock> stocks)
         {
-            ObservableCollection<Stock> observableCollection = new ObservableCollection<Stock>(stocks);
+            var observableCollection = new ObservableCollection<Stock>(stocks);
             dataGrid_Dashboard.ItemsSource = observableCollection;
         }
 
@@ -185,7 +185,7 @@ namespace StockInsight
         {
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
-                Stock stock = (Stock)dataGrid_Dashboard.SelectedItem;
+                var stock = (Stock)dataGrid_Dashboard.SelectedItem;
                 bal.RemoveStockFromWatchlist(stock.Symbol);
                 HandleBindingWithFilter();
                 DisplayGetStartedText();
@@ -203,14 +203,14 @@ namespace StockInsight
 
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
-                Stock stock = (Stock)dataGrid_Dashboard.SelectedItem;
+                var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
                 bal.GetStockDailyData(stock.Symbol, out message);
                 bal.GetMainStockData(stock.Symbol, out message);
 
                 if(bal.IsEmpty(message))
                 {
-                    StockDetails stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
+                    var stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
                     stockDetails.ShowDialog();
                 }
             }

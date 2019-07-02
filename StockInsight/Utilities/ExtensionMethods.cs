@@ -16,6 +16,7 @@ namespace StockInsight.Utilities
         /// <returns></returns>
         public static double ConvertStringToDouble(this String str)
         {
+            str = str ?? "0.01";
             return Math.Round(double.Parse(str),2);
         }
 

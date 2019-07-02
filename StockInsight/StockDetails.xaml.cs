@@ -111,7 +111,7 @@ namespace StockInsight
         /// <param name="month"></param>
         private void BindMonthlyDataToGraph(List<Chart> month)
         {
-            List<string> prices = month.Select(d => d.close).ToList();
+            var prices = month.Select(d => d.close).ToList();
             double firstPrice = bal.GetFirstPrice(prices);
             double lastPrice = bal.GetLastPrice(prices);
 
@@ -130,7 +130,7 @@ namespace StockInsight
         /// <param name="day"></param>
         private void BindDailyDataToGraph(List<DayChart> day)
         {
-            List<string> prices = day.Select(d => d.close).ToList();
+            var prices = day.Select(d => d.close).ToList();
             double firstPrice = bal.GetFirstPrice(prices);
             double lastPrice = bal.GetLastPrice(prices);
 
@@ -168,7 +168,7 @@ namespace StockInsight
         /// <returns></returns>
         private ChartValues<double> GetPrices(List<string> prices)
         {
-            ChartValues<double> values = new ChartValues<double>();
+            var values = new ChartValues<double>();
 
             if(prices.Count > 0)
             {
@@ -209,11 +209,11 @@ namespace StockInsight
         /// <returns></returns>
         private string[] BindDayTimesToAxis(List<DayChart> day)
         {
-            List<string> labelList = new List<string>();
+            var labelList = new List<string>();
 
             foreach (var time in day.AsEnumerable().Reverse())
             {
-                if (time.close != null)
+                if (time.close != null && time.minute != null)
                 {
                     labelList.Add(DateTime.Parse(time.minute).ToString("hh:mm tt"));
                 }

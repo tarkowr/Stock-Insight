@@ -20,7 +20,7 @@ namespace StockInsight.DAL
         {
             string key = DataSettings.QuoteCompanyMonthlyData(symbol);
 
-            RootObject rootObject = new RootObject();
+            var rootObject = new RootObject();
 
             string result = HttpGetData(key);
 
@@ -38,7 +38,7 @@ namespace StockInsight.DAL
         {
             string key = DataSettings.DailyDataApi(symbol);
 
-            List<DayChart> dayChart = new List<DayChart>();
+            var dayChart = new List<DayChart>();
 
             string result = HttpGetData(key);
 
@@ -56,7 +56,7 @@ namespace StockInsight.DAL
         {
             string result = null;
 
-            using (WebClient syncClient = new WebClient())
+            using (var syncClient = new WebClient())
             {
                 result = syncClient.DownloadString(url);
             }

@@ -87,7 +87,7 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         public void GetStockDailyData(string symbol, out string message)
         {
-            Stock stock = new Stock();
+            var stock = new Stock();
             message = "";
 
             try
@@ -104,7 +104,7 @@ namespace StockInsight.BAL
             }
             finally
             {
-                if (stock.DayCharts.Count >= 2)
+                if (stock.DayCharts?.Count >= 2)
                 {
                     stock.DayCharts.Reverse();
                 }
@@ -131,8 +131,8 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void GetMainStockData(string symbol, out string message)
         {
-            Stock stock = new Stock();
-            RootObject rootObject = new RootObject();
+            var stock = new Stock();
+            var rootObject = new RootObject();
             message = "";
 
             try
@@ -156,7 +156,7 @@ namespace StockInsight.BAL
             }
             finally
             {
-                if (stock.MonthCharts.Count >= 2)
+                if (stock.MonthCharts?.Count >= 2)
                 {
                     stock.MonthCharts.Reverse();
                 }
@@ -207,15 +207,9 @@ namespace StockInsight.BAL
             if (close == 0)
             {
                 close = stock.MonthCharts.LastOrDefault(st => st.close != null).close.ConvertStringToDouble();
-
-                stock.Close = close;
-                stock.FormattedClose = close.FormatStockPrice();
             }
-            else
-            {
-                stock.Close = close;
-                stock.FormattedClose = close.FormatStockPrice();
-            }
+            stock.Close = close;
+            stock.FormattedClose = close.FormatStockPrice();
         }
 
         /// <summary>
@@ -306,7 +300,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         private bool DoesStockExist(string symbol, List<Stock> stocks)
         {
-            foreach (Stock stock in stocks)
+            foreach (var stock in stocks)
             {
                 if (stock.Symbol.ToUpper() == symbol.ToUpper())
                 {
