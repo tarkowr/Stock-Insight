@@ -77,10 +77,6 @@
             </DataGrid.Resources>
         </DataGrid>
 
-        <Button x:Name="btn_Refresh" Style="{StaticResource StyledButton}" Content="Refresh" 
-                HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Height="30"
-                Grid.Row="1" Margin="0,0,20,0" Click="Btn_Refresh_Click" Grid.Column="1"/>
-
         <Button x:Name="btn_Details" Style="{StaticResource SecondaryButton}" Content="View" 
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="125" Height="50"
                 Grid.Row="3" Margin="20,20,0,0" Grid.Column="0" Click="Btn_Details_Click"/>

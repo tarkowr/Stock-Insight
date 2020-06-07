@@ -9,20 +9,28 @@ namespace StockInsight.DAL
 {
     class DataSettings
     {
-        public static string mongoDbConnectionString = "mongodb://tarkowr:myPassword02@nmc-shard-00-00-ikrnl.mongodb.net:27017,nmc-shard-00-01-ikrnl.mongodb.net:27017,nmc-shard-00-02-ikrnl.mongodb.net:27017/test?ssl=true&replicaSet=NMC-shard-0&authSource=admin&retryWrites=true";
-        public static string mongoDbDatabase = "StockInsight";
-        public static string mongoDbCollection = "ticker_symbols";
-        public static string ApiBaseUrl = "https://cloud.iexapis.com/stable/stock/";
+        public static readonly string mongoDbConnectionString = ConfigurationManager.AppSettings["MongoDbConnStr"];
+        public static readonly string mongoDbDatabase = ConfigurationManager.AppSettings["MongoDbName"];
+        public static readonly string mongoDbCollection = ConfigurationManager.AppSettings["MongoDbCollection"];
 
+        public static readonly string ApiBaseUrl = "https://cloud.iexapis.com/stable/stock/";
         private static readonly string ApiToken = ConfigurationManager.AppSettings["ApiToken"];
 
-        public static string DailyDataApi(string symbol)
+        public static string Daily(string symbol)
         {
             return $"{ApiBaseUrl}{symbol}/chart/1d?chartInterval=5&token={ApiToken}";
         }
-        public static string QuoteCompanyMonthlyData(string symbol)
+        public static string Monthly(string symbol)
         {
-            return $"{ApiBaseUrl}{symbol}/batch?types=quote,company,chart&range=1m&token={ApiToken}";
+            return $"{ApiBaseUrl}{symbol}/chart/1m?chartCloseOnly=true&token={ApiToken}";
+        }
+        public static string Quote(string symbol)
+        {
+            return $"{ApiBaseUrl}{symbol}/quote?token={ApiToken}";
+        }
+        public static string Company(string symbol)
+        {
+            return $"{ApiBaseUrl}{symbol}/company?token={ApiToken}";
         }
     }
 }

@@ -28,7 +28,7 @@ namespace StockInsight
         private string message;
         Timer ResetTimer = new Timer();
         List<Stock> FilteredStocks;
-        public static int refreshDisableTime = 10000;
+        public static int refreshDisableTime = 60000;
         public static string searchText = "Search...";
 
         public Dashboard(Context _context, BusinessLayer _bal)
@@ -150,33 +150,6 @@ namespace StockInsight
         }
 
         /// <summary>
-        /// Refresh Button Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Btn_Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            message = "";
-
-            ChangeMouseIcon(MouseIcons.LOADING);
-
-            try
-            {
-                bal.GetAllMainStockData(out message);
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                InitializeTimer(ResetTimer);
-                HandleBindingWithFilter();
-                ChangeMouseIcon(MouseIcons.DEFAULT);
-            }
-        }
-
-        /// <summary>
         /// Remove Button Click
         /// </summary>
         /// <param name="sender"></param>
@@ -203,13 +176,17 @@ namespace StockInsight
 
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
+                ChangeMouseIcon(MouseIcons.LOADING);
+
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
+                bal.GetStockCompanyData(stock.Symbol, out message);
                 bal.GetStockDailyData(stock.Symbol, out message);
-                bal.GetMainStockData(stock.Symbol, out message);
+                bal.GetStockMonthlyData(stock.Symbol, out message);
 
                 if(bal.IsEmpty(message))
                 {
+                    ChangeMouseIcon(MouseIcons.DEFAULT);
                     var stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
                     stockDetails.ShowDialog();
                 }
@@ -235,7 +212,33 @@ namespace StockInsight
         {
             message = "";
 
-            bal.SaveWatchList(out message);
+            bal.SaveWatchlist(out message);
+        }
+
+        /// <summary>
+        /// Get live stock data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FetchStockData()
+        {
+            message = "";
+
+            ChangeMouseIcon(MouseIcons.LOADING);
+
+            try
+            {
+                bal.GetAllQuoteData(out message);
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            finally
+            {
+                HandleBindingWithFilter();
+                ChangeMouseIcon(MouseIcons.DEFAULT);
+            }
         }
 
         /// <summary>
@@ -246,14 +249,12 @@ namespace StockInsight
         {
             _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             _timer.Interval = refreshDisableTime;
-            _timer.AutoReset = false;
+            _timer.AutoReset = true;
             _timer.Start();
-
-            btn_Refresh.IsEnabled = false;
         }
 
         /// <summary>
-        /// Re-enable timer after timer is elapsed
+        /// Get live stock data on interval
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
@@ -261,7 +262,7 @@ namespace StockInsight
         {
             this.Dispatcher.Invoke(() =>
             {
-                btn_Refresh.IsEnabled = true;
+                FetchStockData();
             });
         }
 

@@ -313,6 +313,7 @@ namespace StockInsight
             }
             else
             {
+                currency = currency.Replace("(", string.Empty).Replace(")", string.Empty);
                 currency = $" (-{currency})";
             }
 

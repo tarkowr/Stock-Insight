@@ -63,6 +63,10 @@ namespace StockInsight.DAL
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private IMongoCollection<TickerSymbol> GetCharacterColletion()
         {
             var client = new MongoClient(_connectionString);

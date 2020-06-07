@@ -76,16 +76,10 @@ namespace StockInsight.Model
     public class Chart
     {
         public string date { get; set; }
-        public string open { get; set; }
-        public string high { get; set; }
-        public string low { get; set; }
         public string close { get; set; }
         public string volume { get; set; }
-        public string unadjustedVolume { get; set; }
         public string change { get; set; }
         public string changePercent { get; set; }
-        public string vwap { get; set; }
-        public string label { get; set; }
         public string changeOverTime { get; set; }
     }
 
@@ -126,12 +120,5 @@ namespace StockInsight.Model
         public string issueType { get; set; }
         public string sector { get; set; }
         public List<string> tags { get; set; }
-    }
-
-    public class RootObject
-    {
-        public Quote quote { get; set; }
-        public Company company { get; set; }    
-        public List<Chart> chart { get; set; }
     }
 }

@@ -54,7 +54,7 @@ namespace StockInsight
             {
                 if (context.Watchlist.Any())
                 {
-                    bal.GetAllMainStockData(out message);
+                    bal.GetAllQuoteData(out message);
 
                     if (!bal.IsEmpty(message))
                     {

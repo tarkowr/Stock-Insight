@@ -12,39 +12,59 @@ namespace StockInsight.DAL
     public class StockDataService : IStockDataService
     {
         /// <summary>
-        /// Parse and return a RootObject object with Company, Quote, and Monthly data
+        /// Parse and return quote data from API req
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public RootObject GetMainStockData(string symbol)
+        public Quote GetStockQuoteData(string symbol)
         {
-            string key = DataSettings.QuoteCompanyMonthlyData(symbol);
-
-            var rootObject = new RootObject();
+            string key = DataSettings.Quote(symbol);
 
             string result = HttpGetData(key);
 
-            rootObject = JsonConvert.DeserializeObject<RootObject>(result);
-
-            return rootObject;
+            return JsonConvert.DeserializeObject<Quote>(result);
         }
 
         /// <summary>
-        /// Parse and return a List of Day Charts
+        /// Parse and return company data from API req
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public Company GetStockCompanyData(string symbol)
+        {
+            string key = DataSettings.Company(symbol);
+
+            string result = HttpGetData(key);
+
+            return JsonConvert.DeserializeObject<Company>(result);
+        }
+
+        /// <summary>
+        /// Parse and return list of day charts from API req
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
         public List<DayChart> GetStockDailyData(string symbol)
         {
-            string key = DataSettings.DailyDataApi(symbol);
-
-            var dayChart = new List<DayChart>();
+            string key = DataSettings.Daily(symbol);
 
             string result = HttpGetData(key);
 
-            dayChart = JsonConvert.DeserializeObject<List<DayChart>>(result);
+            return JsonConvert.DeserializeObject<List<DayChart>>(result);
+        }
 
-            return dayChart;
+        /// <summary>
+        /// Parse and return list of monthly data from API req
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public List<Chart> GetStockMonthlyData(string symbol)
+        {
+            string key = DataSettings.Monthly(symbol);
+
+            string result = HttpGetData(key);
+
+            return JsonConvert.DeserializeObject<List<Chart>>(result);
         }
 
         /// <summary>

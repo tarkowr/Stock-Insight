@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using StockInsight.Model;
 using StockInsight.DAL;
 using StockInsight.Utilities;
 using System.Text.RegularExpressions;
-using System.Collections.ObjectModel;
 using System.Windows.Media;
 
 namespace StockInsight.BAL
@@ -17,7 +14,7 @@ namespace StockInsight.BAL
         #region Fields and Constructors
         private Context context;
         private IDatabaseService databaseService;
-        private StockDataService stockDataService;
+        private IStockDataService stockDataService;
 
         public BusinessLayer(Context _context)
         {
@@ -44,154 +41,171 @@ namespace StockInsight.BAL
         {
             message = "";
 
-            try
-            {
-                using (databaseService)
-                {
-                    context.Watchlist = databaseService.ReadWatchlist().ToList();
-                    context.Watchlist = context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
+            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, out message);
+            context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
         }
 
         /// <summary>
         /// Save watchlist to database
         /// </summary>
         /// <param name="message"></param>
-        public void SaveWatchList(out string message)
+        public void SaveWatchlist(out string message)
         {
             message = "";
+            var watchlist = context.Watchlist.OrderBy(symbol => symbol.Id).ToList();
 
-            try
-            {
-                using (databaseService)
-                {
-                    databaseService.SaveWatchlist(context.Watchlist.OrderBy(symbol => symbol.Id));
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
+            DatabaseClient.SaveWatchlist(databaseService, watchlist, out message);
         }
         #endregion
 
         #region Stock Data Service
         /// <summary>
-        /// Use stock data service to get daily data
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        public void GetAllQuoteData(out string message)
+        {
+            message = "";
+
+            foreach (TickerSymbol t in context.Watchlist)
+            {
+                GetStockQuoteData(t.Symbol, out message);
+            }
+        }
+
+        /// <summary>
+        /// 
         /// </summary>
         /// <param name="symbol"></param>
+        /// <param name="message"></param>
+        public void GetStockQuoteData(string symbol, out string message)
+        {
+            var stock = new Stock();
+            message = "";
+
+            var quote = StockDataClient.GetStockQuoteData(stockDataService, symbol, out message);
+
+            if (quote == null) return;
+
+            if (DoesStockExist(symbol, context.Stocks))
+            {
+                stock = GetStockBySymbol(symbol, context.Stocks);
+            }
+            else
+            {
+                context.Stocks.Add(stock);
+            }
+
+            BindQuoteToStock(stock, quote);
+            BindPriceToStockProperty(stock);
+            BindStockNameSymbol(stock);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="message"></param>
+        public void GetStockCompanyData(string symbol, out string message)
+        {
+            message = "";
+
+            if (!DoesStockExist(symbol, context.Stocks)) return;
+
+            var company = StockDataClient.GetStockCompanyData(stockDataService, symbol, out message);
+
+            if (company == null) return;
+
+            var stock = GetStockBySymbol(symbol, context.Stocks);
+
+            BindCompanyToStock(stock, company);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="message"></param>
         public void GetStockDailyData(string symbol, out string message)
         {
-            var stock = new Stock();
             message = "";
 
-            try
-            {
-                if (DoesStockExist(symbol, context.Stocks))
-                {
-                    stock = GetStockBySymbol(symbol, context.Stocks);
-                    stock.DayCharts = stockDataService.GetStockDailyData(symbol);
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                if (stock.DayCharts?.Count >= 2)
-                {
-                    stock.DayCharts.Reverse();
-                }
-            }
+            if (!DoesStockExist(symbol, context.Stocks)) return;
+
+            var dayCharts = StockDataClient.GetStockDailyData(stockDataService, symbol, out message);
+
+            if (dayCharts == null) return;
+
+            dayCharts.Reverse();
+
+            var stock = GetStockBySymbol(symbol, context.Stocks);
+
+            BindDailyChartsToStock(stock, dayCharts);
         }
 
         /// <summary>
-        /// Get daily data for each item in watchlist
-        /// </summary>
-        public void GetAllStockDailyData(out string message)
-        {
-            message = "";
-
-            foreach (TickerSymbol t in context.Watchlist)
-            {
-                GetStockDailyData(t.Symbol, out message);
-            }
-        }
-
-        /// <summary>
-        /// Use stock data service to get company, quote, monthly data
+        /// 
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
-        public void GetMainStockData(string symbol, out string message)
-        {
-            var stock = new Stock();
-            var rootObject = new RootObject();
-            message = "";
-
-            try
-            {
-                rootObject = stockDataService.GetMainStockData(symbol);
-
-                if (DoesStockExist(symbol, context.Stocks))
-                {
-                    stock = GetStockBySymbol(symbol, context.Stocks);
-                    BindRootObjectToStock(stock, rootObject);
-                }
-                else
-                {
-                    BindRootObjectToStock(stock, rootObject);
-                    context.Stocks.Add(stock);
-                }
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                if (stock.MonthCharts?.Count >= 2)
-                {
-                    stock.MonthCharts.Reverse();
-                }
-
-                BindPriceToStockProperty(stock);
-                PopulateStockProperties(stock);
-            }
-        }
-
-        /// <summary>
-        /// Get company, quote, and monthly data foreach stock in watchlist
-        /// </summary>
-        /// <param name="message"></param>
-        public void GetAllMainStockData(out string message)
+        public void GetStockMonthlyData(string symbol, out string message)
         {
             message = "";
 
-            foreach (TickerSymbol t in context.Watchlist)
-            {
-                GetMainStockData(t.Symbol, out message);
-            }
+            if (!DoesStockExist(symbol, context.Stocks)) return;
+
+            var monthCharts = StockDataClient.GetStockMonthlyData(stockDataService, symbol, out message);
+
+            if (monthCharts == null) return;
+
+            monthCharts.Reverse();
+
+            var stock = GetStockBySymbol(symbol, context.Stocks);
+
+            BindMonthlyChartsToStock(stock, monthCharts);
         }
+
         #endregion
 
         #region Binding Stock Properties
         /// <summary>
-        /// Set Stock properties equal to RootObject properties
+        /// 
         /// </summary>
         /// <param name="stock"></param>
-        /// <param name="rootObject"></param>
-        public void BindRootObjectToStock(Stock stock, RootObject rootObject)
+        /// <param name="quote"></param>
+        public void BindQuoteToStock(Stock stock, Quote quote)
         {
-            stock.CompanyData = rootObject.company;
-            stock.QuoteData = rootObject.quote;
-            stock.MonthCharts = rootObject.chart;
+            stock.QuoteData = quote;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <param name="company"></param>
+        public void BindCompanyToStock(Stock stock, Company company)
+        {
+            stock.CompanyData = company;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <param name="charts"></param>
+        public void BindDailyChartsToStock(Stock stock, List<DayChart> charts)
+        {
+            stock.DayCharts = charts;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <param name="charts"></param>
+        public void BindMonthlyChartsToStock(Stock stock, List<Chart> charts)
+        {
+            stock.MonthCharts = charts;
         }
 
         /// <summary>
@@ -200,14 +214,9 @@ namespace StockInsight.BAL
         /// <param name="stock"></param>
         private void BindPriceToStockProperty(Stock stock)
         {
-            double close = 0;
+            double close = (stock.QuoteData?.latestPrice ??
+                stock.MonthCharts.LastOrDefault(st => st.close != null)?.close ?? "0.0").ConvertStringToDouble();
 
-            close = stock.QuoteData.latestPrice.ConvertStringToDouble();
-
-            if (close == 0)
-            {
-                close = stock.MonthCharts.LastOrDefault(st => st.close != null).close.ConvertStringToDouble();
-            }
             stock.Close = close;
             stock.FormattedClose = close.FormatStockPrice();
         }
@@ -216,10 +225,10 @@ namespace StockInsight.BAL
         /// Add stock symbol and company name to stock properties
         /// </summary>
         /// <param name="stock"></param>
-        private void PopulateStockProperties(Stock stock)
+        private void BindStockNameSymbol(Stock stock)
         {
-            string symbol = stock.CompanyData.symbol;
-            string name = stock.CompanyData.companyName;
+            string symbol = stock.QuoteData.symbol;
+            string name = stock.QuoteData.companyName;
 
             if (!IsEmpty(symbol))
             {
@@ -248,7 +257,7 @@ namespace StockInsight.BAL
             {
                 if (!DoesStockExist(symbol, context.Stocks))
                 {
-                    GetMainStockData(symbol, out message);
+                    GetStockQuoteData(symbol, out message);
 
                     if (DoesStockExist(symbol, context.Stocks))
                     {
@@ -302,7 +311,7 @@ namespace StockInsight.BAL
         {
             foreach (var stock in stocks)
             {
-                if (stock.Symbol.ToUpper() == symbol.ToUpper())
+                if (stock?.Symbol.ToUpper() == symbol.ToUpper())
                 {
                     return true;
                 }
@@ -430,7 +439,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
         {
-            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
+            return stocks.Where(stock => stock?.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
         }
 
         /// <summary>
@@ -455,7 +464,7 @@ namespace StockInsight.BAL
         private int HandleSymbolId(List<TickerSymbol> tickerSymbols)
         {
             int uniqueId = 1000;
-            List<int> ids = new List<int>();
+            var ids = new List<int>();
 
             foreach (var ts in tickerSymbols)
             {
@@ -483,7 +492,9 @@ namespace StockInsight.BAL
             {
                 price = prices.FirstOrDefault(x => x != null).ConvertStringToDouble();
             }
-            catch { }
+            catch {
+                price = 0;
+            }
 
             return price;
         }
@@ -500,7 +511,9 @@ namespace StockInsight.BAL
             {
                 price = prices.LastOrDefault(x => x != null).ConvertStringToDouble();
             }
-            catch { }
+            catch {
+                price = 0;
+            }
 
             return price;
         }
