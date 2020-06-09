@@ -9,7 +9,7 @@ namespace StockInsight.BAL
     public class StockDataClient
     {
         /// <summary>
-        /// 
+        /// Get stock quote data using stock data service
         /// </summary>
         /// <param name="stockDataService"></param>
         /// <param name="symbol"></param>
@@ -34,7 +34,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Get stock company data using stock data service
         /// </summary>
         /// <param name="stockDataService"></param>
         /// <param name="symbol"></param>
@@ -59,7 +59,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Get stock day chart data using stock data service
         /// </summary>
         /// <param name="stockDataService"></param>
         /// <param name="symbol"></param>
@@ -84,7 +84,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Get stock month chart data using stock data service
         /// </summary>
         /// <param name="stockDataService"></param>
         /// <param name="symbol"></param>

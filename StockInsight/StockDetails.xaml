@@ -77,7 +77,7 @@
 
         <Grid x:Name="CompanyInfo" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Grid.Row="2" Grid.RowSpan="2" Grid.ColumnSpan="2" 
-              Margin="40,0,150,15">
+              Margin="40,0,150,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

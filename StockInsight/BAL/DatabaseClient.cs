@@ -11,7 +11,7 @@ namespace StockInsight.BAL
     public class DatabaseClient
     {
         /// <summary>
-        /// 
+        /// Read in watchlist from database using database service
         /// </summary>
         /// <param name="databaseService"></param>
         /// <param name="message"></param>
@@ -38,7 +38,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Save watchlist to database using database service
         /// </summary>
         /// <param name="databaseService"></param>
         /// <param name="watchlist"></param>

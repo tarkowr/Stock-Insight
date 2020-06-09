@@ -64,7 +64,7 @@ namespace StockInsight.DAL
         }
 
         /// <summary>
-        /// 
+        /// Returns MongoDB collection using db connection
         /// </summary>
         /// <returns></returns>
         private IMongoCollection<TickerSymbol> GetCharacterColletion()

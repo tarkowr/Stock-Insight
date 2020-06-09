@@ -20,6 +20,11 @@ namespace StockInsight.Utilities
             return Math.Round(double.Parse(str),2);
         }
 
+        /// <summary>
+        /// Formats the stock price as a currency
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         public static string FormatStockPrice(this Double val)
         {
             return $"${val.ToString("F")}";

@@ -60,7 +60,7 @@ namespace StockInsight.BAL
 
         #region Stock Data Service
         /// <summary>
-        /// 
+        /// Fetch quote data for all stocks
         /// </summary>
         /// <param name="message"></param>
         public void GetAllQuoteData(out string message)
@@ -74,7 +74,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Fetch quote data by stock
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
@@ -102,7 +102,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Fetch company data by stock
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
@@ -122,7 +122,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Fetch day chart data by stock
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
@@ -144,7 +144,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Fetch month chart data by stock
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
@@ -164,12 +164,11 @@ namespace StockInsight.BAL
 
             BindMonthlyChartsToStock(stock, monthCharts);
         }
-
         #endregion
 
         #region Binding Stock Properties
         /// <summary>
-        /// 
+        /// Attach quote data to stock
         /// </summary>
         /// <param name="stock"></param>
         /// <param name="quote"></param>
@@ -179,7 +178,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Attach company data to stock
         /// </summary>
         /// <param name="stock"></param>
         /// <param name="company"></param>
@@ -189,7 +188,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Attach day charts to stock
         /// </summary>
         /// <param name="stock"></param>
         /// <param name="charts"></param>
@@ -199,7 +198,7 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// 
+        /// Attach month charts to stock
         /// </summary>
         /// <param name="stock"></param>
         /// <param name="charts"></param>
@@ -453,7 +452,7 @@ namespace StockInsight.BAL
             input = input.ToUpper();
             int length = input.Length;
 
-            return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
+            return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock?.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
         }
 
         /// <summary>
