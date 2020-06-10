@@ -26,6 +26,8 @@ namespace StockInsight
         private Context context;
         private BusinessLayer bal;
         private string message;
+        private Error error;
+        private Reporter logger = new Reporter();
         Timer ResetTimer = new Timer();
         List<Stock> FilteredStocks;
         public static int refreshDisableTime = 60000;
@@ -180,11 +182,11 @@ namespace StockInsight
 
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
-                bal.GetStockCompanyData(stock.Symbol, out message);
-                bal.GetStockDailyData(stock.Symbol, out message);
-                bal.GetStockMonthlyData(stock.Symbol, out message);
+                bal.GetStockCompanyData(stock.Symbol, out error);
+                bal.GetStockDailyData(stock.Symbol, out error);
+                bal.GetStockMonthlyData(stock.Symbol, out error);
 
-                if(bal.IsEmpty(message))
+                if(error.Equals(Error.NONE))
                 {
                     ChangeMouseIcon(MouseIcons.DEFAULT);
                     var stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
@@ -210,9 +212,7 @@ namespace StockInsight
         /// <param name="e"></param>
         private void Window_Dashboard_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            message = "";
-
-            bal.SaveWatchlist(out message);
+            bal.SaveWatchlist(out error);
         }
 
         /// <summary>
@@ -222,23 +222,17 @@ namespace StockInsight
         /// <param name="e"></param>
         private void FetchStockData()
         {
-            message = "";
-
             ChangeMouseIcon(MouseIcons.LOADING);
+            logger.info("Fetching Latest Stock Prices");
 
-            try
-            {
-                bal.GetAllQuoteData(out message);
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
+            bal.GetAllQuoteData(out error);
+
+            if (error.Equals(Error.NONE))
             {
                 HandleBindingWithFilter();
-                ChangeMouseIcon(MouseIcons.DEFAULT);
             }
+
+            ChangeMouseIcon(MouseIcons.DEFAULT);
         }
 
         /// <summary>

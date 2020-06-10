@@ -10,16 +10,18 @@ namespace StockInsight.BAL
 {
     public class DatabaseClient
     {
+        private static Reporter logger = new Reporter();
+
         /// <summary>
         /// Read in watchlist from database using database service
         /// </summary>
         /// <param name="databaseService"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static List<TickerSymbol> ReadWatchlist(IDatabaseService databaseService, out string message)
+        public static List<TickerSymbol> ReadWatchlist(IDatabaseService databaseService, out Error error)
         {
             IEnumerable<TickerSymbol> watchlist;
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -31,7 +33,8 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 watchlist = new List<TickerSymbol>();
-                message = ex.Message;
+                error = Error.DB;
+                logger.error(ex.Message);
             }
 
             return watchlist.ToList();
@@ -43,9 +46,9 @@ namespace StockInsight.BAL
         /// <param name="databaseService"></param>
         /// <param name="watchlist"></param>
         /// <param name="message"></param>
-        public static void SaveWatchlist(IDatabaseService databaseService, List<TickerSymbol> watchlist, out string message)
+        public static void SaveWatchlist(IDatabaseService databaseService, List<TickerSymbol> watchlist, out Error error)
         {
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -56,7 +59,8 @@ namespace StockInsight.BAL
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                error = Error.DB;
+                logger.error(ex.Message);
             }
         }
     }

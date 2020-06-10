@@ -8,6 +8,8 @@ namespace StockInsight.BAL
 {
     public class StockDataClient
     {
+        private static Reporter logger = new Reporter();
+
         /// <summary>
         /// Get stock quote data using stock data service
         /// </summary>
@@ -15,10 +17,10 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Quote GetStockQuoteData(IStockDataService stockDataService, string symbol, out string message)
+        public static Quote GetStockQuoteData(IStockDataService stockDataService, string symbol, out Error error)
         {
             Quote quote;
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -27,7 +29,8 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 quote = null;
-                message = ex.Message;
+                error = Error.API;
+                logger.error(ex.Message);
             }
 
             return quote;
@@ -40,10 +43,10 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Company GetStockCompanyData(IStockDataService stockDataService, string symbol, out string message)
+        public static Company GetStockCompanyData(IStockDataService stockDataService, string symbol, out Error error)
         {
             Company company;
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -52,7 +55,8 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 company = null;
-                message = ex.Message;
+                error = Error.API;
+                logger.error(ex.Message);
             }
 
             return company;
@@ -65,10 +69,10 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static List<DayChart> GetStockDailyData(IStockDataService stockDataService, string symbol, out string message)
+        public static List<DayChart> GetStockDailyData(IStockDataService stockDataService, string symbol, out Error error)
         {
             List<DayChart> dayCharts;
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -77,7 +81,8 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 dayCharts = null;
-                message = ex.Message;
+                error = Error.API;
+                logger.error(ex.Message);
             }
 
             return dayCharts;
@@ -90,10 +95,10 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static List<Chart> GetStockMonthlyData(IStockDataService stockDataService, string symbol, out string message)
+        public static List<Chart> GetStockMonthlyData(IStockDataService stockDataService, string symbol, out Error error)
         {
             List<Chart> monthCharts;
-            message = "";
+            error = Error.NONE;
 
             try
             {
@@ -102,7 +107,8 @@ namespace StockInsight.BAL
             catch (Exception ex)
             {
                 monthCharts = null;
-                message = ex.Message;
+                error = Error.API;
+                logger.error(ex.Message);
             }
 
             return monthCharts;

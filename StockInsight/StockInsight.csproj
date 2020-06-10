@@ -103,6 +103,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BAL\DatabaseClient.cs" />
+    <Compile Include="BAL\Reporter.cs" />
     <Compile Include="BAL\StockDataClient.cs" />
     <Compile Include="DAL\DataServices\StockDataService.cs" />
     <Compile Include="DAL\Repositories\IStockDataService.cs" />

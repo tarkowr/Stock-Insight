@@ -19,6 +19,14 @@ namespace StockInsight.Model
         DAY
     }
 
+    public enum Error
+    {
+        NONE,
+        DB,
+        API,
+        OTHER
+    }
+
     public class Context
     {
         public List<TickerSymbol> Watchlist { get; set; }

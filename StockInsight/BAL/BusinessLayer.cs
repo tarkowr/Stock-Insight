@@ -37,11 +37,9 @@ namespace StockInsight.BAL
         /// Read in Watchlist from database
         /// </summary>
         /// <param name="message"></param>
-        public void ReadSavedWatchlist(out string message)
+        public void ReadSavedWatchlist(out Error error)
         {
-            message = "";
-
-            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, out message);
+            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, out error);
             context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
         }
 
@@ -49,12 +47,10 @@ namespace StockInsight.BAL
         /// Save watchlist to database
         /// </summary>
         /// <param name="message"></param>
-        public void SaveWatchlist(out string message)
+        public void SaveWatchlist(out Error error)
         {
-            message = "";
             var watchlist = context.Watchlist.OrderBy(symbol => symbol.Id).ToList();
-
-            DatabaseClient.SaveWatchlist(databaseService, watchlist, out message);
+            DatabaseClient.SaveWatchlist(databaseService, watchlist, out error);
         }
         #endregion
 
@@ -63,13 +59,13 @@ namespace StockInsight.BAL
         /// Fetch quote data for all stocks
         /// </summary>
         /// <param name="message"></param>
-        public void GetAllQuoteData(out string message)
+        public void GetAllQuoteData(out Error error)
         {
-            message = "";
+            error = Error.NONE;
 
             foreach (TickerSymbol t in context.Watchlist)
             {
-                GetStockQuoteData(t.Symbol, out message);
+                GetStockQuoteData(t.Symbol, out error);
             }
         }
 
@@ -78,12 +74,12 @@ namespace StockInsight.BAL
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
-        public void GetStockQuoteData(string symbol, out string message)
+        public void GetStockQuoteData(string symbol, out Error error)
         {
             var stock = new Stock();
-            message = "";
+            error = Error.NONE;
 
-            var quote = StockDataClient.GetStockQuoteData(stockDataService, symbol, out message);
+            var quote = StockDataClient.GetStockQuoteData(stockDataService, symbol, out error);
 
             if (quote == null) return;
 
@@ -106,13 +102,13 @@ namespace StockInsight.BAL
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
-        public void GetStockCompanyData(string symbol, out string message)
+        public void GetStockCompanyData(string symbol, out Error error)
         {
-            message = "";
+            error = Error.NONE;
 
             if (!DoesStockExist(symbol, context.Stocks)) return;
 
-            var company = StockDataClient.GetStockCompanyData(stockDataService, symbol, out message);
+            var company = StockDataClient.GetStockCompanyData(stockDataService, symbol, out error);
 
             if (company == null) return;
 
@@ -126,13 +122,13 @@ namespace StockInsight.BAL
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
-        public void GetStockDailyData(string symbol, out string message)
+        public void GetStockDailyData(string symbol, out Error error)
         {
-            message = "";
+            error = Error.NONE;
 
             if (!DoesStockExist(symbol, context.Stocks)) return;
 
-            var dayCharts = StockDataClient.GetStockDailyData(stockDataService, symbol, out message);
+            var dayCharts = StockDataClient.GetStockDailyData(stockDataService, symbol, out error);
 
             if (dayCharts == null) return;
 
@@ -148,13 +144,13 @@ namespace StockInsight.BAL
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="message"></param>
-        public void GetStockMonthlyData(string symbol, out string message)
+        public void GetStockMonthlyData(string symbol, out Error error)
         {
-            message = "";
+            error = Error.NONE;
 
             if (!DoesStockExist(symbol, context.Stocks)) return;
 
-            var monthCharts = StockDataClient.GetStockMonthlyData(stockDataService, symbol, out message);
+            var monthCharts = StockDataClient.GetStockMonthlyData(stockDataService, symbol, out error);
 
             if (monthCharts == null) return;
 
@@ -256,9 +252,9 @@ namespace StockInsight.BAL
             {
                 if (!DoesStockExist(symbol, context.Stocks))
                 {
-                    GetStockQuoteData(symbol, out message);
+                    GetStockQuoteData(symbol, out Error error);
 
-                    if (DoesStockExist(symbol, context.Stocks))
+                    if (DoesStockExist(symbol, context.Stocks) && error.Equals(Error.NONE))
                     {
                         CreateNewTickerSymbol(context.Watchlist, symbol);
                         context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();

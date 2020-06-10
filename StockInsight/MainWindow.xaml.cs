@@ -24,7 +24,7 @@ namespace StockInsight
     {
         private Context context;
         private BusinessLayer bal;
-        private string message;
+        private Error error;
         private bool errorOnLoad = false;
 
         public MainWindow()
@@ -48,15 +48,15 @@ namespace StockInsight
         /// </summary>
         private void LoadInData()
         {
-            bal.ReadSavedWatchlist(out message);
+            bal.ReadSavedWatchlist(out error);
 
-            if (bal.IsEmpty(message))
+            if (error.Equals(Error.NONE))
             {
                 if (context.Watchlist.Any())
                 {
-                    bal.GetAllQuoteData(out message);
+                    bal.GetAllQuoteData(out error);
 
-                    if (!bal.IsEmpty(message))
+                    if (!error.Equals(Error.NONE))
                     {
                         errorOnLoad = true;
                     }
