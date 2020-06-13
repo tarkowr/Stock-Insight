@@ -8,12 +8,14 @@ namespace StockInsight.Model
 {
     public class TickerSymbol
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
+        public string UserId { get; set; }
         public string Symbol { get; set; }     
         
-        public TickerSymbol(int id, string symbol)
+        public TickerSymbol(string userId, string symbol)
         {
-            Id = id;
+            Id = Guid.NewGuid().ToString();
+            UserId = userId;
             Symbol = symbol;
         }
     }

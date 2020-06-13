@@ -24,6 +24,7 @@ namespace StockInsight.Model
         NONE,
         DB,
         API,
+        LOCALSTORAGE,
         OTHER
     }
 
@@ -31,6 +32,7 @@ namespace StockInsight.Model
     {
         public List<TickerSymbol> Watchlist { get; set; }
         public List<Stock> Stocks { get; set; }
+        public User User { get; set; }
 
         public Context()
         {

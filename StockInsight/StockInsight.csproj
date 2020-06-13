@@ -103,10 +103,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BAL\DatabaseClient.cs" />
+    <Compile Include="BAL\LocalStorageClient.cs" />
     <Compile Include="BAL\Reporter.cs" />
     <Compile Include="BAL\StockDataClient.cs" />
     <Compile Include="DAL\DataServices\StockDataService.cs" />
+    <Compile Include="DAL\DataServices\XmlLocalStorageService.cs" />
+    <Compile Include="DAL\Repositories\ILocalStorageService.cs" />
     <Compile Include="DAL\Repositories\IStockDataService.cs" />
+    <Compile Include="Model\User.cs" />
     <Compile Include="StockDetails.xaml.cs">
       <DependentUpon>StockDetails.xaml</DependentUpon>
     </Compile>
@@ -169,6 +173,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="localStorage.xml">
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

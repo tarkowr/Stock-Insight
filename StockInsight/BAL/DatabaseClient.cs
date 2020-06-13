@@ -18,7 +18,7 @@ namespace StockInsight.BAL
         /// <param name="databaseService"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static List<TickerSymbol> ReadWatchlist(IDatabaseService databaseService, out Error error)
+        public static List<TickerSymbol> ReadWatchlist(IDatabaseService databaseService, string userId, out Error error)
         {
             IEnumerable<TickerSymbol> watchlist;
             error = Error.NONE;
@@ -27,7 +27,7 @@ namespace StockInsight.BAL
             {
                 using (databaseService)
                 {
-                    watchlist = databaseService.ReadWatchlist().ToList();
+                    watchlist = databaseService.ReadWatchlist(userId).ToList();
                 }
             }
             catch (Exception ex)
@@ -41,12 +41,12 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
-        /// Save watchlist to database using database service
+        /// Insert symbol into database using database service
         /// </summary>
         /// <param name="databaseService"></param>
-        /// <param name="watchlist"></param>
-        /// <param name="message"></param>
-        public static void SaveWatchlist(IDatabaseService databaseService, List<TickerSymbol> watchlist, out Error error)
+        /// <param name="symbol"></param>
+        /// <param name="error"></param>
+        public static void InsertSymbol(IDatabaseService databaseService, TickerSymbol symbol, out Error error)
         {
             error = Error.NONE;
 
@@ -54,7 +54,31 @@ namespace StockInsight.BAL
             {
                 using (databaseService)
                 {
-                    databaseService.SaveWatchlist(watchlist.OrderBy(symbol => symbol.Id));
+                    databaseService.InsertSymbol(symbol);
+                }
+            }
+            catch (Exception ex)
+            {
+                error = Error.DB;
+                logger.error(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Remove symbol from database using database service
+        /// </summary>
+        /// <param name="databaseService"></param>
+        /// <param name="symbol"></param>
+        /// <param name="error"></param>
+        public static void DeleteSymbol(IDatabaseService databaseService, TickerSymbol symbol, out Error error)
+        {
+            error = Error.NONE;
+
+            try
+            {
+                using (databaseService)
+                {
+                    databaseService.DeleteSymbol(symbol);
                 }
             }
             catch (Exception ex)

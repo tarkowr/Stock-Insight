@@ -27,13 +27,13 @@ namespace StockInsight.DAL
         /// Read mongoDb for a list of TickerSymbol objects
         /// </summary>
         /// <returns>List of TickerSymbol</returns>
-        public IEnumerable<TickerSymbol> ReadWatchlist()
+        public IEnumerable<TickerSymbol> ReadWatchlist(string userId)
         {
             try
             {
                 var tickerSymbolList = GetCharacterColletion();
 
-                tickerSymbol = tickerSymbolList.Find(Builders<TickerSymbol>.Filter.Empty).ToList();
+                tickerSymbol = tickerSymbolList.Find(Builders<TickerSymbol>.Filter.Where(ts => ts.UserId == userId)).ToList();
             }
             catch (Exception)
             {
@@ -44,18 +44,34 @@ namespace StockInsight.DAL
         }
 
         /// <summary>
-        /// Save the current list of tickerSymbol to the mongoDb
+        /// Insert new symbol into mongoDb
         /// </summary>
         /// <param name="tickerSymbol">list of tickerSymbols</param>
-        public void SaveWatchlist(IEnumerable<TickerSymbol> tickerSymbol)
+        public void InsertSymbol(TickerSymbol symbol)
         {
             try
             {
                 var tickerSymbolList = GetCharacterColletion();
 
-                tickerSymbolList.DeleteMany(Builders<TickerSymbol>.Filter.Empty);
+                tickerSymbolList.InsertOne(symbol);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                tickerSymbolList.InsertMany(tickerSymbol);
+        /// <summary>
+        /// Remove symbol from mongoDb
+        /// </summary>
+        /// <param name="tickerSymbol">list of tickerSymbols</param>
+        public void DeleteSymbol(TickerSymbol symbol)
+        {
+            try
+            {
+                var tickerSymbolList = GetCharacterColletion();
+
+                tickerSymbolList.DeleteOne(ts => ts.Id == symbol.Id && ts.UserId == symbol.UserId);
             }
             catch (Exception)
             {

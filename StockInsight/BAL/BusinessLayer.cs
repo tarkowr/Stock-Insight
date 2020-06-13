@@ -15,6 +15,7 @@ namespace StockInsight.BAL
         private Context context;
         private IDatabaseService databaseService;
         private IStockDataService stockDataService;
+        private ILocalStorageService localStorageService;
 
         public BusinessLayer(Context _context)
         {
@@ -29,6 +30,7 @@ namespace StockInsight.BAL
         {
             databaseService = new MongoDbService();
             stockDataService = new StockDataService();
+            localStorageService = new XmlLocalStorageService();
         }
         #endregion
 
@@ -39,19 +41,50 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void ReadSavedWatchlist(out Error error)
         {
-            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, out error);
+            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, context.User.UserId, out error);
             context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
         }
 
         /// <summary>
-        /// Save watchlist to database
+        /// Add symbol to database
         /// </summary>
-        /// <param name="message"></param>
-        public void SaveWatchlist(out Error error)
+        /// <param name="symbol"></param>
+        /// <param name="error"></param>
+        public void InsertSymbol(TickerSymbol symbol, out Error error)
         {
-            var watchlist = context.Watchlist.OrderBy(symbol => symbol.Id).ToList();
-            DatabaseClient.SaveWatchlist(databaseService, watchlist, out error);
+            DatabaseClient.InsertSymbol(databaseService, symbol, out error);
         }
+
+        /// <summary>
+        /// Remove symbol from database
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="error"></param>
+        public void DeleteSymbol(TickerSymbol symbol, out Error error)
+        {
+            DatabaseClient.DeleteSymbol(databaseService, symbol, out error);
+        }
+        #endregion
+
+        #region Local Storage Service
+        /// <summary>
+        /// Get user from local storage or create new user if none
+        /// </summary>
+        /// <param name="error"></param>
+        public void GetOrCreateUser(out Error error)
+        {
+            User user = LocalStorageClient.GetUser(localStorageService, out error);
+
+            if (user == null)
+            {
+                user = new User();
+            }
+
+            LocalStorageClient.SaveUser(localStorageService, user, out error);
+
+            context.User = user;
+        }
+
         #endregion
 
         #region Stock Data Service
@@ -256,8 +289,9 @@ namespace StockInsight.BAL
 
                     if (DoesStockExist(symbol, context.Stocks) && error.Equals(Error.NONE))
                     {
-                        CreateNewTickerSymbol(context.Watchlist, symbol);
+                        var tickerSymbol = CreateNewTickerSymbol(context.Watchlist, symbol);
                         context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
+                        InsertSymbol(tickerSymbol, out error);
                     }
                     else
                     {
@@ -290,6 +324,7 @@ namespace StockInsight.BAL
                 {
                     context.Stocks.Remove(stockToRemove);
                     context.Watchlist.Remove(symbolToRemove);
+                    DeleteSymbol(symbolToRemove, out Error error);
                 }
             }
         }
@@ -421,9 +456,11 @@ namespace StockInsight.BAL
         /// </summary>
         /// <param name="tickerSymbols"></param>
         /// <param name="symbol"></param>
-        private void CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
+        private TickerSymbol CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
         {
-            tickerSymbols.Add(new TickerSymbol(HandleSymbolId(context.Watchlist), symbol));
+            var tickerSymbol = new TickerSymbol(context.User.UserId, symbol);
+            tickerSymbols.Add(tickerSymbol);
+            return tickerSymbol;
         }
 
         /// <summary>
@@ -449,29 +486,6 @@ namespace StockInsight.BAL
             int length = input.Length;
 
             return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock?.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
-        }
-
-        /// <summary>
-        /// Generate a new ticker symbol ID for a new stock that was added to the watchlist
-        /// </summary>
-        /// <param name="tickerSymbols"></param>
-        /// <returns></returns>
-        private int HandleSymbolId(List<TickerSymbol> tickerSymbols)
-        {
-            int uniqueId = 1000;
-            var ids = new List<int>();
-
-            foreach (var ts in tickerSymbols)
-            {
-                ids.Add(ts.Id);
-            }
-
-            while (ids.Contains(uniqueId))
-            {
-                uniqueId++;
-            }
-
-            return uniqueId;
         }
 
         /// <summary>

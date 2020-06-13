@@ -31,6 +31,7 @@ namespace StockInsight
         {
             InitializeComponent();
             InstantiateFields();
+            GetUser();
             LoadInData();
         }
 
@@ -41,6 +42,19 @@ namespace StockInsight
         {
             context = new Context();
             bal = new BusinessLayer(context);
+        }
+
+        /// <summary>
+        /// Get user from local storage
+        /// </summary>
+        private void GetUser()
+        {
+            bal.GetOrCreateUser(out Error error);
+
+            if (!error.Equals(Error.NONE))
+            {
+                errorOnLoad = true;
+            }
         }
 
         /// <summary>

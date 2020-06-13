@@ -9,7 +9,8 @@ namespace StockInsight.DAL
 {
     public interface IDatabaseService : IDisposable
     {
-        IEnumerable<TickerSymbol> ReadWatchlist();
-        void SaveWatchlist(IEnumerable<TickerSymbol> watchlist);    
+        IEnumerable<TickerSymbol> ReadWatchlist(string userId);
+        void InsertSymbol(TickerSymbol symbol);
+        void DeleteSymbol(TickerSymbol symbol);
     }
 }

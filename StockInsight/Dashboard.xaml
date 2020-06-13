@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StockInsight"
         mc:Ignorable="d"
-        Title="Dashboard" Height="600" Width="700" Closing="Window_Dashboard_Closing" ContentRendered="Window_Dashboard_ContentRendered">
+        Title="Dashboard" Height="600" Width="700" ContentRendered="Window_Dashboard_ContentRendered">
     <Window.Resources>
         <Style x:Key="DataGrid_Centering"
         TargetType="{x:Type DataGridCell}">

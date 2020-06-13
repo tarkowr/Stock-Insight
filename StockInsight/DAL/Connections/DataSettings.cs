@@ -13,6 +13,8 @@ namespace StockInsight.DAL
         public static readonly string mongoDbDatabase = ConfigurationManager.AppSettings["MongoDbName"];
         public static readonly string mongoDbCollection = ConfigurationManager.AppSettings["MongoDbCollection"];
 
+        public static readonly string xmlFilePath = @"localStorage.xml";
+
         public static readonly string ApiBaseUrl = "https://cloud.iexapis.com/stable/stock/";
         private static readonly string ApiToken = ConfigurationManager.AppSettings["ApiToken"];
 

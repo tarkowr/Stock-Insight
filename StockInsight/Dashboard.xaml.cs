@@ -160,10 +160,14 @@ namespace StockInsight
         {
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
+                ChangeMouseIcon(MouseIcons.LOADING);
+
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
                 bal.RemoveStockFromWatchlist(stock.Symbol);
                 HandleBindingWithFilter();
                 DisplayGetStartedText();
+
+                ChangeMouseIcon(MouseIcons.DEFAULT);
             }
         }
 
@@ -203,16 +207,6 @@ namespace StockInsight
         private void Btn_Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
-        }
-
-        /// <summary>
-        /// Window Closing
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Dashboard_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            bal.SaveWatchlist(out error);
         }
 
         /// <summary>
