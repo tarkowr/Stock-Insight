@@ -41,6 +41,13 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void ReadSavedWatchlist(out Error error)
         {
+            if (context?.User == null)
+            {
+                context.Watchlist = new List<TickerSymbol>();
+                error = Error.NONE;
+                return;
+            }
+
             context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, context.User.UserId, out error);
             context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
         }
