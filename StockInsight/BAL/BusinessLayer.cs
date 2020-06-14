@@ -403,7 +403,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         private bool CheckWatchlistCount(List<TickerSymbol> symbols)
         {
-            int max = 30;
+            int max = 20;
 
             if (symbols.Count() >= max)
             {

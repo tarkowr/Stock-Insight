@@ -31,8 +31,6 @@ namespace StockInsight
         {
             InitializeComponent();
             InstantiateFields();
-            GetUser();
-            LoadInData();
         }
 
         /// <summary>
@@ -109,8 +107,15 @@ namespace StockInsight
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void StockInsight_ContentRendered(object sender, EventArgs e)
+        private async void StockInsight_ContentRendered(object sender, EventArgs e)
         {
+            await Task.Run(() => GetUser());
+            await Task.Run(() => LoadInData());
+
+            btn_Begin.Visibility = Visibility.Visible;
+            btn_Exit.Visibility = Visibility.Visible;
+            fa_Spinner.Visibility = Visibility.Hidden;
+
             if (errorOnLoad)
             {
                 lbl_Error.Content = "WARNING: One or more errors ocurred while loading in data for this application.";

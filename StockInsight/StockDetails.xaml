@@ -72,7 +72,7 @@
         </Grid>
 
         <Button x:Name="btn_Close" Content="Exit" Grid.Column="1" Margin="20" Grid.Row="2"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource StyledButton}"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource SecondaryButton}"
                 Width="125" Height="50" Click="btn_Close_Click"/>
 
         <Grid x:Name="CompanyInfo" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
