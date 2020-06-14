@@ -48,6 +48,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>stock_insight_circle.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Avapi, Version=1.4.8.3, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Avapi.1.4.8.3\lib\netstandard2.0\Avapi.dll</HintPath>
@@ -175,6 +178,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="stock_insight.ico" />
+    <Resource Include="stock_insight_circle.ico" />
     <None Include="App.config" />
     <Content Include="localStorage.xml">
     </Content>
