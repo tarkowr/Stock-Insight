@@ -117,36 +117,20 @@ namespace StockInsight
             string symbol = textBox_Search.Text.ToUpper();
             message = "";
 
-            ChangeMouseIcon(MouseIcons.LOADING);
-
-            if (bal.ValidSymbol(symbol, out message)) {
-                try
-                {
-                    bal.AddStockToWatchlist(symbol, out message);
-                }
-                catch (Exception)
-                {
-                    message = $"Unable to find stock symbol {symbol}.";
-                }
-                finally
-                {
-                    FilterBySearchText();
-                    DisplayGetStartedText();
-
-                    if (bal.IsEmpty(message))
-                    {
-                        lbl_SearchError.Content = "";
-                    }
-                    else
-                    {
-                        lbl_SearchError.Content = message;
-                    }
-                }
-            }
-            else
+            if (!bal.ValidSymbol(symbol, out message))
             {
                 lbl_SearchError.Content = message;
+                return;
             }
+
+            ChangeMouseIcon(MouseIcons.LOADING);
+
+            bal.AddStockToWatchlist(symbol, out message);
+
+            FilterBySearchText();
+            DisplayGetStartedText();
+
+            lbl_SearchError.Content = message;
 
             ChangeMouseIcon(MouseIcons.DEFAULT);
         }
@@ -186,13 +170,16 @@ namespace StockInsight
 
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
+                if (stock == null || !bal.DoesStockExist(stock.Symbol, context.Stocks)) return;
+
                 bal.GetStockCompanyData(stock.Symbol, out error);
                 bal.GetStockDailyData(stock.Symbol, out error);
                 bal.GetStockMonthlyData(stock.Symbol, out error);
 
-                if(error.Equals(Error.NONE))
+                ChangeMouseIcon(MouseIcons.DEFAULT);
+
+                if (error.Equals(Error.NONE))
                 {
-                    ChangeMouseIcon(MouseIcons.DEFAULT);
                     var stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
                     stockDetails.ShowDialog();
                 }

@@ -112,7 +112,7 @@
     <Compile Include="BAL\LocalStorageClient.cs" />
     <Compile Include="BAL\Reporter.cs" />
     <Compile Include="BAL\StockDataClient.cs" />
-    <Compile Include="DAL\DataServices\StockDataService.cs" />
+    <Compile Include="DAL\DataServices\IEXStockDataService.cs" />
     <Compile Include="DAL\DataServices\XmlLocalStorageService.cs" />
     <Compile Include="DAL\Repositories\ILocalStorageService.cs" />
     <Compile Include="DAL\Repositories\IStockDataService.cs" />

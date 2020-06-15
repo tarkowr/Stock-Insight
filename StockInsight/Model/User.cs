@@ -11,7 +11,7 @@ namespace StockInsight.Model
         public string UserId { get; set; }
         public DateTime Created { get; set; }
 
-        public User()
+        public void Create()
         {
             UserId = Guid.NewGuid().ToString();
             Created = DateTime.Now;

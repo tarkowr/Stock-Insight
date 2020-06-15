@@ -264,14 +264,14 @@ namespace StockInsight
         private void BindStatsToWindow()
         {
             string company = stock.CompanyName;
-            string ceo = stock.CompanyData.CEO;
-            string industry = stock.CompanyData.industry;
-            string website = stock.CompanyData.website;
-            string exchange = stock.CompanyData.exchange;
+            string ceo = stock.CompanyData?.CEO;
+            string industry = stock.CompanyData?.industry;
+            string website = stock.CompanyData?.website;
+            string exchange = stock.CompanyData?.exchange;
 
-            string peRatio = stock.QuoteData.peRatio;
-            string Wk52High = stock.QuoteData.week52High;
-            string Wk52Low = stock.QuoteData.week52Low;
+            string peRatio = stock.QuoteData?.peRatio;
+            string Wk52High = stock.QuoteData?.week52High;
+            string Wk52Low = stock.QuoteData?.week52Low;
             string volume = stock.MonthCharts.LastOrDefault(x => x.volume != null).volume;
 
             CompanyValue.Content = company;

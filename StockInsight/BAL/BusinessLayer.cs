@@ -29,7 +29,7 @@ namespace StockInsight.BAL
         private void InstantiateFields()
         {
             databaseService = new MongoDbService();
-            stockDataService = new StockDataService();
+            stockDataService = new IEXStockDataService();
             localStorageService = new XmlLocalStorageService();
         }
         #endregion
@@ -48,7 +48,7 @@ namespace StockInsight.BAL
                 return;
             }
 
-            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, context.User.UserId, out error);
+            context.Watchlist = DatabaseClient.ReadWatchlist(databaseService, context.User?.UserId, out error);
             context.Watchlist.OrderBy(stock => stock.Symbol).ToList();
         }
 
@@ -82,12 +82,12 @@ namespace StockInsight.BAL
         {
             User user = LocalStorageClient.GetUser(localStorageService, out error);
 
-            if (user == null)
+            if (user.UserId == null)
             {
                 user = new User();
+                user.Create();
+                LocalStorageClient.SaveUser(localStorageService, user, out error);
             }
-
-            LocalStorageClient.SaveUser(localStorageService, user, out error);
 
             context.User = user;
         }
@@ -117,7 +117,6 @@ namespace StockInsight.BAL
         public void GetStockQuoteData(string symbol, out Error error)
         {
             var stock = new Stock();
-            error = Error.NONE;
 
             var quote = StockDataClient.GetStockQuoteData(stockDataService, symbol, out error);
 
@@ -135,6 +134,8 @@ namespace StockInsight.BAL
             BindQuoteToStock(stock, quote);
             BindPriceToStockProperty(stock);
             BindStockNameSymbol(stock);
+
+            stock.Symbol = stock.Symbol ?? symbol;
         }
 
         /// <summary>
@@ -144,10 +145,6 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void GetStockCompanyData(string symbol, out Error error)
         {
-            error = Error.NONE;
-
-            if (!DoesStockExist(symbol, context.Stocks)) return;
-
             var company = StockDataClient.GetStockCompanyData(stockDataService, symbol, out error);
 
             if (company == null) return;
@@ -164,10 +161,6 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void GetStockDailyData(string symbol, out Error error)
         {
-            error = Error.NONE;
-
-            if (!DoesStockExist(symbol, context.Stocks)) return;
-
             var dayCharts = StockDataClient.GetStockDailyData(stockDataService, symbol, out error);
 
             if (dayCharts == null) return;
@@ -186,10 +179,6 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void GetStockMonthlyData(string symbol, out Error error)
         {
-            error = Error.NONE;
-
-            if (!DoesStockExist(symbol, context.Stocks)) return;
-
             var monthCharts = StockDataClient.GetStockMonthlyData(stockDataService, symbol, out error);
 
             if (monthCharts == null) return;
@@ -250,7 +239,7 @@ namespace StockInsight.BAL
         private void BindPriceToStockProperty(Stock stock)
         {
             double close = (stock.QuoteData?.latestPrice ??
-                stock.MonthCharts.LastOrDefault(st => st.close != null)?.close ?? "0.0").ConvertStringToDouble();
+                stock.MonthCharts?.LastOrDefault(st => st.close != null)?.close ?? "0.0").ConvertStringToDouble();
 
             stock.Close = close;
             stock.FormattedClose = close.FormatStockPrice();
@@ -262,8 +251,8 @@ namespace StockInsight.BAL
         /// <param name="stock"></param>
         private void BindStockNameSymbol(Stock stock)
         {
-            string symbol = stock.QuoteData.symbol;
-            string name = stock.QuoteData.companyName;
+            string symbol = stock.QuoteData?.symbol;
+            string name = stock.QuoteData?.companyName;
 
             if (!IsEmpty(symbol))
             {
@@ -288,32 +277,29 @@ namespace StockInsight.BAL
             message = "";
             symbol = symbol.ToUpper();
 
-            if (CheckWatchlistCount(context.Watchlist))
-            {
-                if (!DoesStockExist(symbol, context.Stocks))
-                {
-                    GetStockQuoteData(symbol, out Error error);
-
-                    if (DoesStockExist(symbol, context.Stocks) && error.Equals(Error.NONE))
-                    {
-                        var tickerSymbol = CreateNewTickerSymbol(context.Watchlist, symbol);
-                        context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
-                        InsertSymbol(tickerSymbol, out error);
-                    }
-                    else
-                    {
-                        throw new Exception();
-                    }
-                }
-                else
-                {
-                    message = $"{symbol} is already in your Watchlist.";
-                }
-            }
-            else
+            if (!CheckWatchlistCount(context.Watchlist))
             {
                 message = $"Watchlist is full.";
+                return;
             }
+
+            if (DoesStockExist(symbol, context.Stocks))
+            {
+                message = $"{symbol} is already in your Watchlist.";
+                return;
+            }
+
+            GetStockQuoteData(symbol, out Error error);
+
+            if (!DoesStockExist(symbol, context.Stocks) || !error.Equals(Error.NONE))
+            {
+                message = $"Unable to find stock symbol {symbol}.";
+                return;
+            }
+
+            var tickerSymbol = CreateNewTickerSymbol(context.Watchlist, symbol);
+            context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
+            InsertSymbol(tickerSymbol, out error);
         }
 
         /// <summary>
@@ -344,11 +330,11 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         /// <param name="stocks"></param>
         /// <returns></returns>
-        private bool DoesStockExist(string symbol, List<Stock> stocks)
+        public bool DoesStockExist(string symbol, List<Stock> stocks)
         {
             foreach (var stock in stocks)
             {
-                if (stock?.Symbol.ToUpper() == symbol.ToUpper())
+                if (stock.Symbol.ToUpper() == symbol.ToUpper())
                 {
                     return true;
                 }
@@ -366,34 +352,28 @@ namespace StockInsight.BAL
         public bool ValidSymbol(string input, out string message)
         {
             int maxSymbolLength = 15;
-            bool valid = false;
             string defaultText = "SEARCH...";
             message = "";
 
-            if (input != "" && input != null && input != defaultText)
-            {
-                if (Regex.IsMatch(input, @"^[a-zA-Z.]+$"))
-                {
-                    if (input.Length <= maxSymbolLength)
-                    {
-                        valid = true;
-                    }
-                    else
-                    {
-                        message = "Symbol is too long.";
-                    }
-                }
-                else
-                {
-                    message = "Invalid Symbol.";
-                }
-            }
-            else
+            if (input == "" || input == null || input == defaultText)
             {
                 message = "Empty Symbol.";
+                return false;
             }
 
-            return valid;
+            if (!Regex.IsMatch(input, @"^[a-zA-Z.]+$"))
+            {
+                message = "Invalid Symbol.";
+                return false;
+            }
+
+            if (input.Length > maxSymbolLength)
+            {
+                message = "Symbol is too long.";
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -405,12 +385,7 @@ namespace StockInsight.BAL
         {
             int max = 20;
 
-            if (symbols.Count() >= max)
-            {
-                return false;
-            }
-
-            return true;
+            return symbols.Count() < max;
         }
 
         /// <summary>
@@ -420,7 +395,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public bool IsEmpty(string msg)
         {
-            return string.IsNullOrEmpty(msg) ? true : false;
+            return string.IsNullOrEmpty(msg);
         }
 
         /// <summary>
@@ -429,7 +404,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public bool IsWatchlistEmpty()
         {
-            return context.Watchlist.Count > 0 ? false : true;
+            return context.Watchlist.Count == 0;
         }
         #endregion
 
@@ -465,7 +440,7 @@ namespace StockInsight.BAL
         /// <param name="symbol"></param>
         private TickerSymbol CreateNewTickerSymbol(List<TickerSymbol> tickerSymbols, string symbol)
         {
-            var tickerSymbol = new TickerSymbol(context.User.UserId, symbol);
+            var tickerSymbol = new TickerSymbol(context.User?.UserId, symbol);
             tickerSymbols.Add(tickerSymbol);
             return tickerSymbol;
         }
@@ -478,7 +453,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public Stock GetStockBySymbol(string symbol, List<Stock> stocks)
         {
-            return stocks.Where(stock => stock?.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
+            return stocks.Where(stock => stock.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefault();
         }
 
         /// <summary>
@@ -492,7 +467,20 @@ namespace StockInsight.BAL
             input = input.ToUpper();
             int length = input.Length;
 
-            return stocks.Where(stock => stock.Symbol.Contains(input) || new string(stock?.CompanyName.ToUpper().Take(length).ToArray()) == input).ToList();
+            return stocks.Where(stock => stock.Symbol.Contains(input) || GetStockNameSubstring(stock?.CompanyName, length) == input).ToList();
+        }
+
+        /// <summary>
+        /// Retrieve stock name substring for filtering
+        /// </summary>
+        /// <param name="companyName"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        private string GetStockNameSubstring(string companyName, int length)
+        {
+            if (companyName == null) return null;
+
+            return new string(companyName.ToUpper().Take(length).ToArray());
         }
 
         /// <summary>
@@ -502,17 +490,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public double GetFirstPrice(List<string> prices)
         {
-            double price = 0;
-
-            try
-            {
-                price = prices.FirstOrDefault(x => x != null).ConvertStringToDouble();
-            }
-            catch {
-                price = 0;
-            }
-
-            return price;
+            return (prices.FirstOrDefault(x => x != null) ?? "0").ConvertStringToDouble();
         }
 
         /// <summary>
@@ -522,16 +500,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public double GetLastPrice(List<string> prices)
         {
-            double price = 0;
-            try
-            {
-                price = prices.LastOrDefault(x => x != null).ConvertStringToDouble();
-            }
-            catch {
-                price = 0;
-            }
-
-            return price;
+            return (prices.LastOrDefault(x => x != null) ?? "0").ConvertStringToDouble();
         }
 
         /// <summary>
@@ -542,12 +511,7 @@ namespace StockInsight.BAL
         /// <returns></returns>
         public Brush GetLineColor(double open, double close)
         {
-            if (open > close)
-            {
-                return WindowStyles.RedSI;
-            }
-
-            return WindowStyles.GreenSI;
+            return open > close ? WindowStyles.RedSI : WindowStyles.GreenSI;
         }
         #endregion
     }

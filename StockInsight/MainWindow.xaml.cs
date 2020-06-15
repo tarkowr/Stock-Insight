@@ -62,21 +62,19 @@ namespace StockInsight
         {
             bal.ReadSavedWatchlist(out error);
 
-            if (error.Equals(Error.NONE))
-            {
-                if (context.Watchlist.Any())
-                {
-                    bal.GetAllQuoteData(out error);
-
-                    if (!error.Equals(Error.NONE))
-                    {
-                        errorOnLoad = true;
-                    }
-                }
-            }
-            else
+            if (!error.Equals(Error.NONE))
             {
                 errorOnLoad = true;
+            }
+
+            if (context.Watchlist.Any())
+            {
+                bal.GetAllQuoteData(out error);
+
+                if (!error.Equals(Error.NONE))
+                {
+                    errorOnLoad = true;
+                }
             }
         }
 

@@ -9,7 +9,7 @@ using StockInsight.Model;
 
 namespace StockInsight.DAL
 {
-    public class StockDataService : IStockDataService
+    public class IEXStockDataService : IStockDataService    
     {
         /// <summary>
         /// Parse and return quote data from API req
