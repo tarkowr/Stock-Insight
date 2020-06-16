@@ -271,18 +271,16 @@ namespace StockInsight
         {
             string input = textBox_Search.Text.ToString();
 
-            FilteredStocks = new List<Stock>(context.Stocks);
-
-            FilteredStocks = bal.ReturnFilteredStocks(FilteredStocks, input);
-
             if (bal.IsEmpty(input))
             {
                 BindToDataGrid(context.Stocks);
+                return;
             }
-            else
-            {
-                BindToDataGrid(FilteredStocks);
-            }
+
+            FilteredStocks = new List<Stock>(context.Stocks);
+            FilteredStocks = bal.ReturnFilteredStocks(FilteredStocks, input);
+
+            BindToDataGrid(FilteredStocks);
         }
 
         /// <summary>

@@ -170,7 +170,7 @@ namespace StockInsight
         {
             var values = new ChartValues<double>();
 
-            if(prices.Count > 0)
+            if (prices.Count > 0)
             {
                 foreach (var price in prices.AsEnumerable().Reverse())
                 {
@@ -195,7 +195,7 @@ namespace StockInsight
 
             foreach(var day in month.AsEnumerable().Reverse())
             {
-                DateTime temp = DateTime.Parse(day.date);
+                var temp = DateTime.Parse(day.date);
                 labelList.Add(temp.ToString("MM/dd"));
             }
 
@@ -239,7 +239,7 @@ namespace StockInsight
         /// <param name="e"></param>
         private void Btn_MonthChart_Click(object sender, RoutedEventArgs e)
         {
-            if(CurrentGraph == StockType.DAY)
+            if (CurrentGraph == StockType.DAY)
             {
                 BindMonthlyDataToGraph(stock.MonthCharts);
             }
@@ -304,7 +304,7 @@ namespace StockInsight
         private void BindPercentage(double percentage, double change)
         {
             string symbol = "";
-            string currency = String.Format("{0:C}", change);
+            string currency = string.Format("{0:C}", change);
 
             if (percentage > 0)
             {
