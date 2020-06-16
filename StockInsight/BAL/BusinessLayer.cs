@@ -139,6 +139,44 @@ namespace StockInsight.BAL
         }
 
         /// <summary>
+        /// Get stock detail data if needed
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="error"></param>
+        public void GetStockDetailData(Stock stock, out Error error)  
+        {
+            var isTrading = AreStocksCurrentlyTrading();
+            error = Error.NONE;
+
+            var companyErr = Error.NONE;
+            var dailyErr = Error.NONE;
+            var monthlyErr = Error.NONE;
+
+            if (!IsStockCompanyDataCached(stock))
+            {
+                GetStockCompanyData(stock.Symbol, out error);
+                companyErr = error;
+            }
+
+            if (isTrading || !IsStockDailyDataCached(stock))
+            {
+                GetStockDailyData(stock.Symbol, out error);
+                dailyErr = error;
+            }
+
+            if (isTrading || !IsStockMonthlyDataCached(stock))
+            {
+                GetStockMonthlyData(stock.Symbol, out error);
+                monthlyErr = error;
+            }
+
+            if (!companyErr.Equals(Error.NONE) || !dailyErr.Equals(Error.NONE) || !monthlyErr.Equals(Error.NONE))
+            {
+                error = Error.API;
+            }
+        }
+
+        /// <summary>
         /// Fetch company data by stock
         /// </summary>
         /// <param name="symbol"></param>
@@ -433,6 +471,60 @@ namespace StockInsight.BAL
         #endregion
 
         #region Helpers
+        /// <summary>
+        /// Determine whether stocks are currently trading by day of week and time
+        /// </summary>
+        /// <returns></returns>
+        public bool AreStocksCurrentlyTrading()
+        {
+            var start = new TimeSpan(9, 30, 0);
+            var end = new TimeSpan(16, 0, 0);
+            var now = DateTime.Now.TimeOfDay;
+            var dayOfWeek = DateTime.Now.DayOfWeek;
+
+            if (now < start || now > end)
+            {
+                return false;
+            }
+
+            if (dayOfWeek == DayOfWeek.Saturday || dayOfWeek == DayOfWeek.Sunday)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determine whether stock has company data
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <returns></returns>
+        public bool IsStockCompanyDataCached(Stock stock)
+        {
+            return !IsEmpty(stock.CompanyData?.symbol);
+        }
+
+        /// <summary>
+        /// Determine whether stock has daily charts data
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <returns></returns>
+        public bool IsStockDailyDataCached(Stock stock)
+        {
+            return stock.DayCharts?.Count > 0;
+        }
+
+        /// <summary>
+        /// Determine whether stock has monthly charts data
+        /// </summary>
+        /// <param name="stock"></param>
+        /// <returns></returns>
+        public bool IsStockMonthlyDataCached(Stock stock)
+        {
+            return stock.MonthCharts?.Count > 0;
+        }
+
         /// <summary>
         /// Create a new Ticker Symbol for an added stock to the watchlist
         /// </summary>

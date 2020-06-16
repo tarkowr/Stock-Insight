@@ -28,9 +28,11 @@ namespace StockInsight
         private string message;
         private Error error;
         private Reporter logger = new Reporter();
-        Timer ResetTimer = new Timer();
-        List<Stock> FilteredStocks;
-        public static int refreshDisableTime = 60000;
+        private Timer ResetTimer = new Timer();
+        private List<Stock> FilteredStocks;
+        private bool dataLock = false;
+
+        public static int fetchInterval = 60000;
         public static string searchText = "Search...";
 
         public Dashboard(Context _context, BusinessLayer _bal)
@@ -112,8 +114,10 @@ namespace StockInsight
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Btn_Add_Click(object sender, RoutedEventArgs e)
+        private async void Btn_Add_Click(object sender, RoutedEventArgs e)
         {
+            if (dataLock) return;
+
             string symbol = textBox_Search.Text.ToUpper();
             message = "";
 
@@ -125,7 +129,9 @@ namespace StockInsight
 
             ChangeMouseIcon(MouseIcons.LOADING);
 
-            bal.AddStockToWatchlist(symbol, out message);
+            dataLock = true;
+            await Task.Run(() => bal.AddStockToWatchlist(symbol, out message));
+            dataLock = false;
 
             FilterBySearchText();
             DisplayGetStartedText();
@@ -140,14 +146,20 @@ namespace StockInsight
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Btn_Remove_Click(object sender, RoutedEventArgs e)
+        private async void Btn_Remove_Click(object sender, RoutedEventArgs e)
         {
+            if (dataLock) return;
+
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
                 ChangeMouseIcon(MouseIcons.LOADING);
 
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
-                bal.RemoveStockFromWatchlist(stock.Symbol);
+
+                dataLock = true;
+                await Task.Run(() => bal.RemoveStockFromWatchlist(stock.Symbol));
+                dataLock = false;
+
                 HandleBindingWithFilter();
                 DisplayGetStartedText();
 
@@ -160,22 +172,24 @@ namespace StockInsight
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Btn_Details_Click(object sender, RoutedEventArgs e)
+        private async void Btn_Details_Click(object sender, RoutedEventArgs e)
         {
+            if (dataLock) return;
+
             message = "";
 
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
-                ChangeMouseIcon(MouseIcons.LOADING);
-
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
                 if (stock == null || !bal.DoesStockExist(stock.Symbol, context.Stocks)) return;
 
-                bal.GetStockCompanyData(stock.Symbol, out error);
-                bal.GetStockDailyData(stock.Symbol, out error);
-                bal.GetStockMonthlyData(stock.Symbol, out error);
+                ChangeMouseIcon(MouseIcons.LOADING);
+                dataLock = true;
 
+                await Task.Run(() => bal.GetStockDetailData(stock, out error));
+
+                dataLock = false;
                 ChangeMouseIcon(MouseIcons.DEFAULT);
 
                 if (error.Equals(Error.NONE))
@@ -201,19 +215,18 @@ namespace StockInsight
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void FetchStockData()
+        private void FetchStockData(out Error error)
         {
-            ChangeMouseIcon(MouseIcons.LOADING);
-            logger.info("Fetching Latest Stock Prices");
-
-            bal.GetAllQuoteData(out error);
-
-            if (error.Equals(Error.NONE))
+            if (!dataLock)
             {
-                HandleBindingWithFilter();
+                logger.info("Fetching Latest Stock Prices");
+                bal.GetAllQuoteData(out error);
             }
-
-            ChangeMouseIcon(MouseIcons.DEFAULT);
+            else
+            {
+                logger.info("Skipping Stock Data Fetch because of Data Lock");
+                error = Error.OTHER;
+            }
         }
 
         /// <summary>
@@ -223,22 +236,32 @@ namespace StockInsight
         private void InitializeTimer(Timer _timer)
         {
             _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            _timer.Interval = refreshDisableTime;
+            _timer.Interval = fetchInterval;
             _timer.AutoReset = true;
             _timer.Start();
         }
 
         /// <summary>
-        /// Get live stock data on interval
+        /// Get live stock data on interval if stocks are trading
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        private async void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            this.Dispatcher.Invoke(() =>
+            if (bal.AreStocksCurrentlyTrading())
             {
-                FetchStockData();
-            });
+                await Task.Run(() => FetchStockData(out error));
+
+                if (!error.Equals(Error.NONE))
+                {
+                    return;
+                }
+
+                Dispatcher.Invoke(() =>
+                {
+                    HandleBindingWithFilter();
+                });
+            }
         }
 
         /// <summary>
