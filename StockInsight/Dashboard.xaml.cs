@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using StockInsight.Model;
 using StockInsight.BAL;
 using System.Timers;
@@ -127,18 +119,12 @@ namespace StockInsight
                 return;
             }
 
-            ChangeMouseIcon(MouseIcons.LOADING);
-
-            dataLock = true;
-            await Task.Run(() => bal.AddStockToWatchlist(symbol, out message));
-            dataLock = false;
+            await RunTaskAsyncWithLock(() => bal.AddStockToWatchlist(symbol, out message));
 
             FilterBySearchText();
             DisplayGetStartedText();
 
             lbl_SearchError.Content = message;
-
-            ChangeMouseIcon(MouseIcons.DEFAULT);
         }
 
         /// <summary>
@@ -152,18 +138,12 @@ namespace StockInsight
 
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
-                ChangeMouseIcon(MouseIcons.LOADING);
-
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
 
-                dataLock = true;
-                await Task.Run(() => bal.RemoveStockFromWatchlist(stock.Symbol));
-                dataLock = false;
+                await RunTaskAsyncWithLock(() => bal.RemoveStockFromWatchlist(stock.Symbol));
 
                 HandleBindingWithFilter();
                 DisplayGetStartedText();
-
-                ChangeMouseIcon(MouseIcons.DEFAULT);
             }
         }
 
@@ -184,13 +164,7 @@ namespace StockInsight
 
                 if (stock == null || !bal.DoesStockExist(stock.Symbol, context.Stocks)) return;
 
-                ChangeMouseIcon(MouseIcons.LOADING);
-                dataLock = true;
-
-                await Task.Run(() => bal.GetStockDetailData(stock, out error));
-
-                dataLock = false;
-                ChangeMouseIcon(MouseIcons.DEFAULT);
+                await RunTaskAsyncWithLock(() => bal.GetStockDetailData(stock, out error));
 
                 if (error.Equals(Error.NONE))
                 {
@@ -208,6 +182,21 @@ namespace StockInsight
         private void Btn_Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        /// <summary>
+        /// Run a time consuming task async with a lock on data
+        /// </summary>
+        /// <param name="action"></param>
+        private async Task<bool> RunTaskAsyncWithLock(Action action)
+        {
+            ChangeMouseIcon(MouseIcons.LOADING);
+            dataLock = true;
+            await Task.Run(action);
+            dataLock = false;
+            ChangeMouseIcon(MouseIcons.DEFAULT);
+
+            return true;
         }
 
         /// <summary>
