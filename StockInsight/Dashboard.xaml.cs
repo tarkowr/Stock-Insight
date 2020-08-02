@@ -50,8 +50,7 @@ namespace StockInsight
         /// <param name="stocks"></param>
         private void BindToDataGrid(List<Stock> stocks)
         {
-            var observableCollection = new ObservableCollection<Stock>(stocks);
-            dataGrid_Dashboard.ItemsSource = observableCollection;
+            dataGrid_Dashboard.ItemsSource = new ObservableCollection<Stock>(stocks);
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace StockInsight
         /// <param name="e"></param>
         private void TextBox_Search_KeyUp(object sender, KeyEventArgs e)
         {
-            FilterBySearchText();
+            FilterBySearchTextAndBind();
         }
 
         /// <summary>
@@ -121,9 +120,7 @@ namespace StockInsight
 
             await RunTaskAsyncWithLock(() => bal.AddStockToWatchlist(symbol, out message));
 
-            FilterBySearchText();
-            DisplayGetStartedText();
-
+            FilterBySearchTextAndBind();
             lbl_SearchError.Content = message;
         }
 
@@ -142,7 +139,7 @@ namespace StockInsight
 
                 await RunTaskAsyncWithLock(() => bal.RemoveStockFromWatchlist(stock.Symbol));
 
-                HandleBindingWithFilter();
+                FilterBySearchTextAndBind();
                 DisplayGetStartedText();
             }
         }
@@ -156,8 +153,6 @@ namespace StockInsight
         {
             if (dataLock) return;
 
-            message = "";
-
             if (dataGrid_Dashboard.SelectedItems.Count == 1)
             {
                 var stock = (Stock)dataGrid_Dashboard.SelectedItem;
@@ -168,8 +163,13 @@ namespace StockInsight
 
                 if (error.Equals(Error.NONE))
                 {
-                    var stockDetails = new StockDetails(bal.GetStockBySymbol(stock.Symbol, context.Stocks), bal);
-                    stockDetails.ShowDialog();
+                    var selectedStock = bal.GetStockBySymbol(stock.Symbol, context.Stocks);
+
+                    if (selectedStock != null)
+                    {
+                        var stockDetails = new StockDetails(selectedStock, bal);
+                        stockDetails.ShowDialog();
+                    }
                 }
             }
         }
@@ -248,7 +248,7 @@ namespace StockInsight
 
                 Dispatcher.Invoke(() =>
                 {
-                    HandleBindingWithFilter();
+                    FilterBySearchTextAndBind();
                 });
             }
         }
@@ -256,11 +256,11 @@ namespace StockInsight
         /// <summary>
         /// Filter watchlist datagrid by search box text
         /// </summary>
-        private void FilterBySearchText()
+        private void FilterBySearchTextAndBind()    
         {
             string input = textBox_Search.Text.ToString();
 
-            if (bal.IsEmpty(input))
+            if (bal.IsEmpty(input) || input.ToUpper() == searchText.ToUpper())
             {
                 BindToDataGrid(context.Stocks);
                 return;
@@ -270,23 +270,6 @@ namespace StockInsight
             FilteredStocks = bal.ReturnFilteredStocks(FilteredStocks, input);
 
             BindToDataGrid(FilteredStocks);
-        }
-
-        /// <summary>
-        /// Bind to Datagrid when Filter might be applied
-        /// </summary>
-        private void HandleBindingWithFilter()
-        {
-            string input = textBox_Search.Text.ToString();
-
-            if (input.ToUpper() != searchText.ToUpper())
-            {
-                FilterBySearchText();
-            }
-            else
-            {
-                BindToDataGrid(context.Stocks);
-            }
         }
 
         /// <summary>

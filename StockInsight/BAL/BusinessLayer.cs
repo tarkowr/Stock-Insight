@@ -41,10 +41,10 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void ReadSavedWatchlist(out Error error)
         {
-            if (context?.User == null)
+            if (context.User == null)
             {
                 context.Watchlist = new List<TickerSymbol>();
-                error = Error.NONE;
+                error = Error.OTHER;
                 return;
             }
 
@@ -116,18 +116,15 @@ namespace StockInsight.BAL
         /// <param name="message"></param>
         public void GetStockQuoteData(string symbol, out Error error)
         {
-            var stock = new Stock();
-
             var quote = StockDataClient.GetStockQuoteData(stockDataService, symbol, out error);
 
             if (quote == null) return;
 
-            if (DoesStockExist(symbol, context.Stocks))
+            var stock = GetStockBySymbol(symbol, context.Stocks);
+
+            if (stock == null)
             {
-                stock = GetStockBySymbol(symbol, context.Stocks);
-            }
-            else
-            {
+                stock = new Stock();
                 context.Stocks.Add(stock);
             }
 
@@ -237,6 +234,7 @@ namespace StockInsight.BAL
         /// <param name="quote"></param>
         public void BindQuoteToStock(Stock stock, Quote quote)
         {
+            if (stock == null || quote == null) return;
             stock.QuoteData = quote;
         }
 
@@ -247,6 +245,7 @@ namespace StockInsight.BAL
         /// <param name="company"></param>
         public void BindCompanyToStock(Stock stock, Company company)
         {
+            if (stock == null || company == null) return;
             stock.CompanyData = company;
         }
 
@@ -257,6 +256,7 @@ namespace StockInsight.BAL
         /// <param name="charts"></param>
         public void BindDailyChartsToStock(Stock stock, List<DayChart> charts)
         {
+            if (stock == null || charts == null) return;
             stock.DayCharts = charts;
         }
 
@@ -267,11 +267,13 @@ namespace StockInsight.BAL
         /// <param name="charts"></param>
         public void BindMonthlyChartsToStock(Stock stock, List<Chart> charts)
         {
+            if (stock == null || charts == null) return;
             stock.MonthCharts = charts;
         }
 
         /// <summary>
         /// Bind close and formattedClose Stock Properties
+        /// Only needs to be called after fetching quote stock data
         /// </summary>
         /// <param name="stock"></param>
         private void BindPriceToStockProperty(Stock stock)
@@ -285,6 +287,7 @@ namespace StockInsight.BAL
 
         /// <summary>
         /// Add stock symbol and company name to stock properties
+        /// Only needs to be called after fetching quote stock data
         /// </summary>
         /// <param name="stock"></param>
         private void BindStockNameSymbol(Stock stock)
@@ -337,6 +340,7 @@ namespace StockInsight.BAL
 
             var tickerSymbol = CreateNewTickerSymbol(context.Watchlist, symbol);
             context.Stocks = context.Stocks.OrderBy(stock => stock.Symbol).ToList();
+
             InsertSymbol(tickerSymbol, out error);
         }
 
@@ -348,8 +352,8 @@ namespace StockInsight.BAL
         {
             if (DoesStockExist(symbol, context.Stocks))
             {
-                var stockToRemove = context.Stocks.SingleOrDefault(stock => stock.Symbol == symbol);
-                var symbolToRemove = context.Watchlist.SingleOrDefault(sym => sym.Symbol == symbol);
+                var stockToRemove = context.Stocks.FirstOrDefault(stock => stock.Symbol == symbol);
+                var symbolToRemove = context.Watchlist.FirstOrDefault(sym => sym.Symbol == symbol);
 
                 if (stockToRemove != null && symbolToRemove != null)
                 {

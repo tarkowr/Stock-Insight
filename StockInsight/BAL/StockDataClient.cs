@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using StockInsight.Model;
 using StockInsight.DAL;
 
-
 namespace StockInsight.BAL
 {
     public class StockDataClient
