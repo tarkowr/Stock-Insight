@@ -121,6 +121,7 @@ namespace StockInsight
             await RunTaskAsyncWithLock(() => bal.AddStockToWatchlist(symbol, out message));
 
             FilterBySearchTextAndBind();
+            DisplayGetStartedText();
             lbl_SearchError.Content = message;
         }
 
