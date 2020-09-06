@@ -64,25 +64,16 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        
+
         <Label x:Name="lbl_Title" 
                Content="Stock Insight" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" 
                FontWeight="ExtraLight" FontSize="50" Foreground="White" 
                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <Button x:Name="btn_Begin" Style="{StaticResource secondary}" Content="Launch" HorizontalAlignment="Right" Grid.Row="3" 
-                Margin="0, 0, 30, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight" Visibility="Hidden"
-                Click="Btn_Begin_Click"/>
 
         <fa:ImageAwesome x:Name="fa_Spinner" Icon="CircleOutlineNotch" Foreground="White" Spin="True" Height="48" Width="48" HorizontalAlignment="Stretch" Grid.Row="3" 
                 Grid.ColumnSpan="2" VerticalAlignment="Top"/>
 
-        <Button x:Name="btn_Exit" Style="{StaticResource primary}" Content="Exit" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1" 
-                Margin="30, 0, 0, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight" Visibility="Hidden"
-                Click="Btn_Exit_Click">
-        </Button>
-        <Label x:Name="lbl_CreatedBy" Grid.ColumnSpan="2" Content="Created by Richie Tarkowski" HorizontalAlignment="Stretch" Grid.Row="2" 
-               VerticalAlignment="Top" HorizontalContentAlignment="Center" Foreground="White" FontWeight="ExtraLight"/>
-        <Label x:Name="lbl_Error" Content="" FontSize="10" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-               Grid.ColumnSpan="2" Grid.Row="4" HorizontalContentAlignment="Center" Foreground="#303030"/>
+        <Label x:Name="lbl_CreatedBy" Grid.ColumnSpan="2" Content="Created by Richie Tarkowski " HorizontalAlignment="Stretch" Grid.Row="2" 
+               VerticalAlignment="Top" HorizontalContentAlignment="Center" Foreground="White" FontWeight="ExtraLight" FontSize="14"/>
     </Grid>
 </Window>
