@@ -44,6 +44,7 @@ namespace StockInsight
             InitializeTimer(ResetTimer);
         }
 
+
         /// <summary>
         /// Bind a list of stocks to the watchlist datagrid
         /// </summary>
