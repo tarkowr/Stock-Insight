@@ -52,27 +52,6 @@ namespace StockInsight
             }
         }
 
-        /// <summary>	
-        /// Exit Button Click	
-        /// </summary>	
-        /// <param name="sender"></param>	
-        /// <param name="e"></param>	
-        private void Btn_Exit_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        /// <summary>	
-        /// Begin Button Click	
-        /// </summary>	
-        /// <param name="sender"></param>	
-        /// <param name="e"></param>	
-        private void Btn_Begin_Click(object sender, RoutedEventArgs e)
-        {
-            Dashboard dashboard = new Dashboard(context, bal);
-            this.Close();
-            dashboard.ShowDialog();
-        }
 
         /// <summary>
         /// Window Content Rendered
@@ -84,9 +63,9 @@ namespace StockInsight
             await Task.Run(() => GetUser());
             await Task.Run(() => LoadInData());
 
-            btn_Begin.Visibility = Visibility.Visible;
-            btn_Exit.Visibility = Visibility.Visible;
-            fa_Spinner.Visibility = Visibility.Hidden;
+            Dashboard dashboard = new Dashboard(context, bal);
+            dashboard.Show();
+            this.Close();
         }
     }
 }

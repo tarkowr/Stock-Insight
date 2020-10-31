@@ -4,83 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:StockInsight"
         mc:Ignorable="d"
-        Title="Stock Insight" Height="400" Width="550" ContentRendered="StockInsight_ContentRendered">
-    <Window.Resources>
-        <Style TargetType="{x:Type Button}" x:Key="primary">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="White"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="White" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#3bf9c9"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style TargetType="{x:Type Button}" x:Key="secondary">
-            <Setter Property="Foreground" Value="#FF39DBB2"/>
-            <Setter Property="BorderBrush" Value="White"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="White" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF39DBB2"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
+        Title="Stock Insight" Height="400" Width="550" ContentRendered="StockInsight_ContentRendered"
+        ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen">
     <Grid Background="#FF39DBB2">
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="4*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="4*"/>
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
         <Label x:Name="lbl_Title" 
-               Content="Stock Insight" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" 
-               FontWeight="ExtraLight" FontSize="50" Foreground="White" 
+               Content="Stock Insight" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"
+               FontWeight="ExtraLight" FontSize="48" Foreground="White" 
                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <Button x:Name="btn_Begin" Style="{StaticResource secondary}" Content="Launch" HorizontalAlignment="Right" Grid.Row="3" 
-                Margin="0, 0, 30, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight" Visibility="Hidden"
-                Click="Btn_Begin_Click"/>
 
-        <fa:ImageAwesome x:Name="fa_Spinner" Icon="CircleOutlineNotch" Foreground="White" Spin="True" Height="48" Width="48" HorizontalAlignment="Stretch" Grid.Row="3" 
-                Grid.ColumnSpan="2" VerticalAlignment="Top"/>
+        <fa:ImageAwesome x:Name="fa_Spinner" Icon="CircleOutlineNotch" Foreground="White" Spin="True" Height="48" Width="48"
+                HorizontalAlignment="Stretch" Grid.Row="2" VerticalAlignment="Top"/>
 
-        <Button x:Name="btn_Exit" Style="{StaticResource primary}" Content="Exit" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1" 
-                Margin="30, 0, 0, 0" VerticalAlignment="Top" Height="50" Width="150" FontSize="16" FontWeight="ExtraLight" Visibility="Hidden"
-                Click="Btn_Exit_Click"/>
-
-        <Label x:Name="lbl_CreatedBy" Grid.ColumnSpan="2" Content="Created by Richie Tarkowski " HorizontalAlignment="Stretch" Grid.Row="2" 
-               VerticalAlignment="Top" HorizontalContentAlignment="Center" Foreground="White" FontWeight="ExtraLight" FontSize="14"/>
     </Grid>
 </Window>

@@ -177,16 +177,6 @@ namespace StockInsight
         }
 
         /// <summary>
-        /// Exit Button Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Btn_Exit_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        /// <summary>
         /// Run a time consuming task async with a lock on data
         /// </summary>
         /// <param name="action"></param>
