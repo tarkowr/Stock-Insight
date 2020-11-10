@@ -476,15 +476,20 @@ namespace StockInsight.BAL
 
         #region Helpers
         /// <summary>
-        /// Determine whether stocks are currently trading by day of week and time
+        /// Determine whether stocks are currently trading by day of week and time (EST)
         /// </summary>
         /// <returns></returns>
         public bool AreStocksCurrentlyTrading()
         {
             var start = new TimeSpan(9, 30, 0);
             var end = new TimeSpan(16, 0, 0);
-            var now = DateTime.Now.TimeOfDay;
-            var dayOfWeek = DateTime.Now.DayOfWeek;
+
+            // Get EST time of day and week day
+            var timeUtc = DateTime.UtcNow;
+            TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+            DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, easternZone);
+            var now = easternTime.TimeOfDay;
+            var dayOfWeek = easternTime.DayOfWeek;
 
             if (now < start || now > end)
             {

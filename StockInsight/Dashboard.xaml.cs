@@ -216,7 +216,7 @@ namespace StockInsight
         /// <param name="_timer"></param>
         private void InitializeTimer(Timer _timer)
         {
-            _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            _timer.Elapsed += new ElapsedEventHandler(FetchStockData);
             _timer.Interval = fetchInterval;
             _timer.AutoReset = true;
             _timer.Start();
@@ -227,7 +227,7 @@ namespace StockInsight
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
-        private async void OnTimedEvent(object source, ElapsedEventArgs e)
+        private async void FetchStockData(object source, ElapsedEventArgs e)
         {
             if (bal.AreStocksCurrentlyTrading())
             {
